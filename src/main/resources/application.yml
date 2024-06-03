@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://192.168.1.103:5432/onlinejudge
+    username: onlinejudge
+    password: onlinejudge
+    driver-class-name: org.postgresql.Driver
+
+#mybatis-flex:
+#  configuration:
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
