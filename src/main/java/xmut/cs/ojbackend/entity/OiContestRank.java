@@ -1,10 +1,11 @@
 package xmut.cs.ojbackend.entity;
 
-import com.mybatisflex.annotation.Id;
-import com.mybatisflex.annotation.KeyType;
-import com.mybatisflex.annotation.Table;
+import com.alibaba.fastjson2.JSONObject;
+import com.mybatisflex.annotation.*;
+
 import java.io.Serializable;
 
+import com.mybatisflex.core.handler.Fastjson2TypeHandler;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,14 +29,27 @@ public class OiContestRank implements Serializable {
     @Id(keyType = KeyType.Auto)
     private Integer id;
 
+    @Column(onInsertValue = "0")
     private Integer submissionNumber;
 
+    @Column(onInsertValue = "0")
     private Integer totalScore;
 
-    private String submissionInfo;
+    @Column(onInsertValue = "'{}'", typeHandler = Fastjson2TypeHandler.class)
+    private JSONObject submissionInfo;
 
     private Integer contestId;
 
     private Integer userId;
 
+    @RelationOneToOne(selfField = "userId", targetField = "id")
+    private User user;
+
+    public OiContestRank(Integer contestId, Integer userId) {
+        this.contestId = contestId;
+        this.userId = userId;
+        this.submissionNumber = 0;
+        this.totalScore = 0;
+        this.submissionInfo = new JSONObject();
+    }
 }

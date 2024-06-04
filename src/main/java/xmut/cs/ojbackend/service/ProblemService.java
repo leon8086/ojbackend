@@ -10,5 +10,5 @@ import xmut.cs.ojbackend.entity.Problem;
  * @since 2024-06-03
  */
 public interface ProblemService extends IService<Problem> {
-
+    public Object listPage(Integer page, Integer limit, String keyword, String difficulty, String tag);
 }

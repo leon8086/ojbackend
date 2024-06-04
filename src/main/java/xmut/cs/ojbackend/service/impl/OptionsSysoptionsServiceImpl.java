@@ -6,6 +6,8 @@ import xmut.cs.ojbackend.mapper.OptionsSysoptionsMapper;
 import xmut.cs.ojbackend.service.OptionsSysoptionsService;
 import org.springframework.stereotype.Service;
 
+import static xmut.cs.ojbackend.entity.table.OptionsSysoptionsTableDef.OPTIONS_SYSOPTIONS;
+
 /**
  *  服务层实现。
  *
@@ -14,5 +16,16 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class OptionsSysoptionsServiceImpl extends ServiceImpl<OptionsSysoptionsMapper, OptionsSysoptions> implements OptionsSysoptionsService {
+    @Override
+    public Object getValue(String key) {
+        OptionsSysoptions optionsSysoptions = this.getOne(OPTIONS_SYSOPTIONS.KEY.eq(key));
+        return optionsSysoptions.getValue();
+    }
 
+    @Override
+    public void updateValue(String key, Object value) {
+        OptionsSysoptions option = new OptionsSysoptions();
+        option.setValue(value);
+        this.update(option, OPTIONS_SYSOPTIONS.KEY.eq(key));
+    }
 }

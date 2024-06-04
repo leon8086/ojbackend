@@ -1,12 +1,13 @@
 package xmut.cs.ojbackend.entity;
 
-import com.mybatisflex.annotation.Column;
-import com.mybatisflex.annotation.Id;
-import com.mybatisflex.annotation.KeyType;
-import com.mybatisflex.annotation.Table;
-import java.io.Serializable;
-import java.sql.Timestamp;
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
+import com.mybatisflex.annotation.*;
 
+import java.io.Serializable;
+import java.util.List;
+
+import com.mybatisflex.core.handler.Fastjson2TypeHandler;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -38,21 +39,26 @@ public class Problem implements Serializable {
 
     private String outputDescription;
 
-    private String samples;
+    @Column(typeHandler = Fastjson2TypeHandler.class)
+    private JSONArray samples;
 
     private String testCaseId;
 
-    private String testCaseScore;
+    @Column(typeHandler = Fastjson2TypeHandler.class)
+    private JSONArray testCaseScore;
 
     private String hint;
 
-    private String languages;
+    @Column(typeHandler = Fastjson2TypeHandler.class)
+    private List<String> languages;
 
-    private String template;
+    @Column(onInsertValue = "'{}'", typeHandler = Fastjson2TypeHandler.class)
+    private JSONObject template;
 
-    private Timestamp createTime;
+    @Column(onInsertValue = "to_char(now(), 'YYYY-MM-DD HH24:MI:SS')")
+    private String createTime;
 
-    private Timestamp lastUpdateTime;
+    private String lastUpdateTime;
 
     private Integer timeLimit;
 
@@ -74,16 +80,19 @@ public class Problem implements Serializable {
 
     private String source;
 
+    @Column(onInsertValue = "0")
     private Long submissionNumber;
 
+    @Column(onInsertValue = "0")
     private Long acceptedNumber;
 
     private Integer createdById;
 
     @Column(value = "_id")
-    private String titleId;
+    private String displayId;
 
-    private String statisticInfo;
+    @Column(onInsertValue = "'{}'", typeHandler = Fastjson2TypeHandler.class)
+    private JSONObject statisticInfo;
 
     private Integer totalScore;
 
@@ -93,8 +102,17 @@ public class Problem implements Serializable {
 
     private Boolean spjCompileOk;
 
-    private String ioMode;
+    @Column(typeHandler = Fastjson2TypeHandler.class)
+    private JSONObject ioMode;
 
     private Boolean shareSubmission;
 
+    @RelationManyToMany(
+            joinTable = "problem_tags",
+            selfField = "id",
+            joinSelfColumn="problem_id",
+            targetField = "id",
+            joinTargetColumn="problemtag_id"
+    )
+    private List<ProblemTag> tags;
 }

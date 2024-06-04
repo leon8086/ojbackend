@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.beans.factory.annotation.Autowired;
+import xmut.cs.ojbackend.base.Result;
 import xmut.cs.ojbackend.entity.ProblemTag;
 import xmut.cs.ojbackend.service.ProblemTagService;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,7 +23,7 @@ import java.util.List;
  * @since 2024-06-03
  */
 @RestController
-@RequestMapping("/problemTag")
+@RequestMapping("/tag")
 public class ProblemTagController {
 
     @Autowired
@@ -67,8 +68,8 @@ public class ProblemTagController {
      * @return 所有数据
      */
     @GetMapping("list")
-    public List<ProblemTag> list() {
-        return problemTagService.list();
+    public Object list() {
+        return Result.success(problemTagService.list());
     }
 
     /**

@@ -12,7 +12,8 @@ class OjbackendApplicationTests {
     ProblemService problemService;
     @Test
     void contextLoads() {
-        System.out.println(problemService.list());
+        System.out.println(problemService
+                .listPage(1,10,"", "", "队列"));
     }
 
 }

@@ -1,6 +1,9 @@
 package xmut.cs.ojbackend.controller;
 
+import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mybatisflex.core.paginate.Page;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -9,10 +12,17 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.beans.factory.annotation.Autowired;
+import xmut.cs.ojbackend.base.Result;
 import xmut.cs.ojbackend.entity.Submission;
+import xmut.cs.ojbackend.service.ProblemService;
 import xmut.cs.ojbackend.service.SubmissionService;
 import org.springframework.web.bind.annotation.RestController;
+import xmut.cs.ojbackend.utils.DateUtil;
+import xmut.cs.ojbackend.utils.JudgeUtil;
+import xmut.cs.ojbackend.utils.JwtUtil;
+
 import java.io.Serializable;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -27,6 +37,16 @@ public class SubmissionController {
 
     @Autowired
     private SubmissionService submissionService;
+
+    @Autowired
+    private HttpServletRequest request;
+
+    @Autowired
+    private ProblemService problemService;
+
+    @Autowired
+    private JudgeUtil judgeUtil;
+
 
     /**
      * 添加。
@@ -91,6 +111,21 @@ public class SubmissionController {
     @GetMapping("page")
     public Page<Submission> page(Page<Submission> page) {
         return submissionService.page(page);
+    }
+
+    @PostMapping("submit")
+    public Object commitCode( @RequestBody Submission submission ) throws JsonProcessingException{
+        //submission.setCreateTime(DateUtil.getCurrTime());
+        Calendar calendar = Calendar.getInstance();
+        submission.setCreateTime(calendar.getTime());
+        //submission.setUserId(JwtUtil.getUserId(request.getHeader("token")));
+        //submission.setUsername(JwtUtil.getUsername(request.getHeader("token")));
+        submission.setIp(request.getRemoteAddr());
+        submission.setUserId(1);
+        submission.setUsername("root");
+        submissionService.save(submission);
+        judgeUtil.judge(submission,problemService.getById(submission.getProblemId()), "http://192.168.1.103:8080/judge", JudgeUtil.token);
+        return Result.success(submission);
     }
 
 }
