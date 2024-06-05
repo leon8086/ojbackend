@@ -1,5 +1,0 @@
-restart:
-  include:
-    json: "/com.alibaba.fastjson.*.jar"
-    cache: "/spring-data-redis-.*.*.jar"
-    entity: "/xmut.*.*.jar*"

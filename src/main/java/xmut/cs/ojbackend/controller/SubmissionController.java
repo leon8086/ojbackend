@@ -41,13 +41,6 @@ public class SubmissionController {
     @Autowired
     private HttpServletRequest request;
 
-    @Autowired
-    private ProblemService problemService;
-
-    @Autowired
-    private JudgeUtil judgeUtil;
-
-
     /**
      * 添加。
      *
@@ -114,18 +107,8 @@ public class SubmissionController {
     }
 
     @PostMapping("submit")
-    public Object commitCode( @RequestBody Submission submission ) throws JsonProcessingException{
-        //submission.setCreateTime(DateUtil.getCurrTime());
-        Calendar calendar = Calendar.getInstance();
-        submission.setCreateTime(calendar.getTime());
-        //submission.setUserId(JwtUtil.getUserId(request.getHeader("token")));
-        //submission.setUsername(JwtUtil.getUsername(request.getHeader("token")));
-        submission.setIp(request.getRemoteAddr());
-        submission.setUserId(1);
-        submission.setUsername("root");
-        submissionService.save(submission);
-        judgeUtil.judge(submission,problemService.getById(submission.getProblemId()), "http://192.168.1.103:8080/judge", JudgeUtil.token);
-        return Result.success(submission);
+    public Object submitCode( @RequestBody Submission submission ) throws JsonProcessingException{
+        return submissionService.submitCode(submission, request.getRemoteAddr(), 1);
     }
 
 }

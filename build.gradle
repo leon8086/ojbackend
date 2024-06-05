@@ -8,7 +8,9 @@ group = 'xmut.cs'
 version = '0.0.1-SNAPSHOT'
 
 java {
-    sourceCompatibility = '17'
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
 }
 
 configurations {
@@ -22,23 +24,20 @@ repositories {
 }
 
 dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
     compileOnly 'org.projectlombok:lombok'
-    compileOnly 'org.apache.tomcat:tomcat-servlet-api:9.0.37'
+    //developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'org.postgresql:postgresql'
-    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'io.projectreactor:reactor-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-    //developmentOnly 'org.springframework.boot:spring-boot-devtools'
-
+    implementation 'org.apache.tomcat:tomcat-servlet-api:9.0.37'
     implementation 'org.mapstruct:mapstruct:1.5.5.Final'
     implementation 'com.mybatis-flex:mybatis-flex-codegen:1.8.1'
     implementation 'com.mybatis-flex:mybatis-flex-spring-boot-starter:1.9.1'
@@ -52,8 +51,4 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
-}
-
-tasks.withType(JavaCompile) {
-    options.encoding = "UTF-8";
 }

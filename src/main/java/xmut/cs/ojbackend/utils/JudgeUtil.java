@@ -4,7 +4,9 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.springframework.beans.factory.annotation.Value;
 import xmut.cs.ojbackend.entity.*;
+import xmut.cs.ojbackend.mapper.SubmissionMapper;
 import xmut.cs.ojbackend.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -38,9 +40,10 @@ public class JudgeUtil {
     @Autowired
     private ContestService contestService;
 
-
     @Autowired
-    private SubmissionService submissionService;
+    private SubmissionMapper submissionMapper;
+    //@Autowired
+    //private SubmissionService submissionService;
 
     @Autowired
     private OiContestRankService oiContestRankService;
@@ -140,7 +143,8 @@ public class JudgeUtil {
                 submission.setResult(PARTIALLY_ACCEPTED);
             }
         }
-        submissionService.saveOrUpdate(submission);
+        //submissionService.saveOrUpdate(submission);
+        submissionMapper.update(submission);
         update_problem_status(submission, problem);
         if (submission.getContestId() != null) {
             Contest contest = contestService.getById(submission.getContestId());
