@@ -11,4 +11,6 @@ import xmut.cs.ojbackend.entity.Problem;
  */
 public interface ProblemService extends IService<Problem> {
     public Object listPage(Integer page, Integer limit, String keyword, String difficulty, String tag);
+
+    public Object info( Integer id );
 }

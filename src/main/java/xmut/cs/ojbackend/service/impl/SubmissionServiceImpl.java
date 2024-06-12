@@ -5,6 +5,7 @@ import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import xmut.cs.ojbackend.base.Result;
+import xmut.cs.ojbackend.entity.Problem;
 import xmut.cs.ojbackend.entity.Submission;
 import xmut.cs.ojbackend.entity.User;
 import xmut.cs.ojbackend.mapper.SubmissionMapper;
@@ -47,7 +48,8 @@ public class SubmissionServiceImpl extends ServiceImpl<SubmissionMapper, Submiss
         submission.setUserId(userId);
         submission.setUsername(user.getUsername());
         save(submission);
-        judgeUtil.judge(submission,problemService.getById(submission.getProblemId()), JUDGE_URL, JudgeUtil.token);
+        Problem problem = problemService.getById(submission.getProblemId());
+        judgeUtil.judge(submission,problem, JUDGE_URL, JudgeUtil.token);
         return Result.success(submission);
     }
 }

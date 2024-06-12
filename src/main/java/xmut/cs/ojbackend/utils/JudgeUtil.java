@@ -19,6 +19,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Map;
 
 
 @Component
@@ -42,11 +43,18 @@ public class JudgeUtil {
 
     @Autowired
     private SubmissionMapper submissionMapper;
+
+    @Autowired
+    private CommonUtil commonUtil;
+
     //@Autowired
     //private SubmissionService submissionService;
 
     @Autowired
     private OiContestRankService oiContestRankService;
+
+    @Value("${judge-server.url}")
+    private static String JudgeServerUrl;
 
     public static final int COMPILE_ERROR = -2;
 
@@ -104,6 +112,14 @@ public class JudgeUtil {
         //向判题服务器发送post请求
         RestTemplate restTemplate = new RestTemplate();
 
+        String code = submission.getCode();
+        if(!problem.getTemplate().isEmpty() && !problem.getTemplate().getString(submission.getLanguage()).isEmpty()) {
+            code = commonUtil.applyCPPTemplate(problem.getTemplate().getString(submission.getLanguage()), code);
+        }
+        else{
+            code = code;
+        }
+        //submission.(code);
         //创建请求头
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -111,7 +127,7 @@ public class JudgeUtil {
 
         JSONObject taskInfo = new JSONObject();
         taskInfo.put("language_config", getLanguageConfig(submission.getLanguage()));
-        taskInfo.put("src", submission.getCode());
+        taskInfo.put("src", code);
         taskInfo.put("max_cpu_time", problem.getTimeLimit());
         taskInfo.put("max_memory", problem.getMemoryLimit() * 1024 * 1024);
         taskInfo.put("test_case_id", problem.getTestCaseId());
@@ -136,14 +152,20 @@ public class JudgeUtil {
         } else {
             submission.setInfo(result);
             JSONArray testData = result.getObject("data", JSONArray.class);
+            int count = 0;
+            for (Object testDatum : testData) {
+                JSONObject item = (JSONObject) testDatum;
+                if (item.getInteger("result") != ACCEPTED) {
+                    count++;
+                }
+            }
             computeStatisticInfo(submission, testData, problem);
-            if (testData.isEmpty()) {
+            if (count == 0) {
                 submission.setResult(ACCEPTED);
             } else {
                 submission.setResult(PARTIALLY_ACCEPTED);
             }
         }
-        //submissionService.saveOrUpdate(submission);
         submissionMapper.update(submission);
         update_problem_status(submission, problem);
         if (submission.getContestId() != null) {
@@ -165,8 +187,7 @@ public class JudgeUtil {
         Submission submission = (Submission) task.get("submission");
         Problem problem = (Problem) task.get("problem");
 
-        String judgeUrl = "http://192.168.1.103:8080/judge";
-        judge(submission, problem, judgeUrl, token);
+        judge(submission, problem, JudgeServerUrl, token);
     }
 
     private void computeStatisticInfo(Submission submission, JSONArray testData, Problem problem) {

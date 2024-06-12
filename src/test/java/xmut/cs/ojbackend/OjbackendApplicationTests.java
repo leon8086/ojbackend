@@ -30,7 +30,7 @@ class OjbackendApplicationTests {
                 #include <iostream>
                 using namespace std;
                 int main() {
-                  short a, b;
+                  int a, b;
                   cin >> a >> b;
                   cout << a + b << endl;
                   return 0;
@@ -39,5 +39,24 @@ class OjbackendApplicationTests {
         submission.setCode(code);
         submission.setLanguage("C++");
         submissionService.submitCode(submission, "127.0.0.1", 1);
+    }
+
+    @Test
+    void testApplyTemplate() throws JsonProcessingException {
+        Submission submission = new Submission();
+        submission.setProblemId(22);
+        String code = """
+                int add_func( int a, int b ){
+                    return a+b;
+                }
+                """;
+        submission.setCode(code);
+        submission.setLanguage("C");
+        submissionService.submitCode(submission, "127.0.0.1", 1);
+    }
+
+    @Test
+    void testProblemInfo(){
+        System.out.println(problemService.info(22));
     }
 }

@@ -10,7 +10,7 @@ import xmut.cs.ojbackend.entity.VO.VOProblemTitle;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2024-06-06T00:12:42+0800",
+    date = "2024-06-07T13:59:39+0800",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.7 (Microsoft)"
 )
 @Component

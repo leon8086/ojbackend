@@ -87,8 +87,8 @@ public class ProblemController {
      */
     @GetMapping("detail")
     public Object getInfo(Integer id) {
-        Object ret = Result.success(problemService.getById(id));
-        return ret;
+        Object ret = problemService.info(id);
+        return Result.success(ret);
     }
 
     /**
