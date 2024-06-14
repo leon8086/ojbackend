@@ -10,8 +10,8 @@ import xmut.cs.ojbackend.entity.VO.VOProblemTitle;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2024-06-07T13:59:39+0800",
-    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.7 (Microsoft)"
+    date = "2024-06-12T07:16:37+0000",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.11 (Ubuntu)"
 )
 @Component
 public class VoProblemTitleWrapperImpl implements VoProblemTitleWrapper {

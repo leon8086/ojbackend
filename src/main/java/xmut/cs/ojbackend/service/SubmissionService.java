@@ -13,4 +13,6 @@ import xmut.cs.ojbackend.entity.Submission;
 public interface SubmissionService extends IService<Submission> {
 
     public Object submitCode( Submission submission, String ip, Integer userId ) throws JsonProcessingException;
+
+    public Object listPage(Integer page, Integer limit, Integer result, String username);
 }

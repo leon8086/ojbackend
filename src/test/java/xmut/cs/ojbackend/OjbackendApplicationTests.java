@@ -59,4 +59,14 @@ class OjbackendApplicationTests {
     void testProblemInfo(){
         System.out.println(problemService.info(22));
     }
+
+    @Test
+    void testSubmission(){
+        System.out.println(submissionService.getById("157248380030963712"));
+    }
+
+    @Test
+    void testSubmissionList(){
+        System.out.println(submissionService.listPage(1, 10, null, null));
+    }
 }

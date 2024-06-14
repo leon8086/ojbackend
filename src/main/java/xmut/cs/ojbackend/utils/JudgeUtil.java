@@ -142,7 +142,6 @@ public class JudgeUtil {
         ResponseEntity<String> responseEntity = restTemplate.postForEntity(judgeUrl, entity, String.class);
         String data = responseEntity.getBody();
         JSONObject result = JSON.parseObject(data);
-        System.out.println(result);
         if (result.get("err") != null) {
             JSONObject staticInfo = new JSONObject();
             staticInfo.put("err_info", result.get("data"));
@@ -153,7 +152,9 @@ public class JudgeUtil {
             submission.setInfo(result);
             JSONArray testData = result.getObject("data", JSONArray.class);
             int count = 0;
+            int total = 0;
             for (Object testDatum : testData) {
+                total ++;
                 JSONObject item = (JSONObject) testDatum;
                 if (item.getInteger("result") != ACCEPTED) {
                     count++;
@@ -162,8 +163,10 @@ public class JudgeUtil {
             computeStatisticInfo(submission, testData, problem);
             if (count == 0) {
                 submission.setResult(ACCEPTED);
-            } else {
+            } else if( count != total ) {
                 submission.setResult(PARTIALLY_ACCEPTED);
+            } else {
+                submission.setResult(WRONG_ANSWER);
             }
         }
         submissionMapper.update(submission);

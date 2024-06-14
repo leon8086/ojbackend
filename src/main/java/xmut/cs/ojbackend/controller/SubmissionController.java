@@ -80,19 +80,15 @@ public class SubmissionController {
      * @return 所有数据
      */
     @GetMapping("list")
-    public List<Submission> list() {
-        return submissionService.list();
+    public Object list( Integer page, Integer limit, Integer result, String username ){
+        Object ret = Result.success(submissionService.listPage(page, limit, result, username ));
+        return ret;
     }
 
-    /**
-     * 根据主键获取详细信息。
-     *
-     * @param id 主键
-     * @return 详情
-     */
-    @GetMapping("getInfo/{id}")
-    public Submission getInfo(@PathVariable Serializable id) {
-        return submissionService.getById(id);
+    private Integer problemId;
+    @PostMapping("get")
+    public Object getInfo( @RequestBody Submission submission) {
+        return Result.success(submissionService.getById(submission.getId()));
     }
 
     /**

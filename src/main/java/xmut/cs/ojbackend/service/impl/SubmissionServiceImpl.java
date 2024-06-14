@@ -1,6 +1,7 @@
 package xmut.cs.ojbackend.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,6 +9,7 @@ import xmut.cs.ojbackend.base.Result;
 import xmut.cs.ojbackend.entity.Problem;
 import xmut.cs.ojbackend.entity.Submission;
 import xmut.cs.ojbackend.entity.User;
+import xmut.cs.ojbackend.entity.VO.VOSubmissionList;
 import xmut.cs.ojbackend.mapper.SubmissionMapper;
 import xmut.cs.ojbackend.service.ProblemService;
 import xmut.cs.ojbackend.service.SubmissionService;
@@ -16,6 +18,8 @@ import xmut.cs.ojbackend.service.UserService;
 import xmut.cs.ojbackend.utils.JudgeUtil;
 
 import java.util.Calendar;
+
+import static xmut.cs.ojbackend.entity.table.SubmissionTableDef.SUBMISSION;
 
 /**
  *  服务层实现。
@@ -31,6 +35,9 @@ public class SubmissionServiceImpl extends ServiceImpl<SubmissionMapper, Submiss
 
     @Autowired
     ProblemService problemService;
+
+    @Autowired
+    SubmissionMapper submissionMapper;
 
     @Autowired
     UserService userService;
@@ -51,5 +58,19 @@ public class SubmissionServiceImpl extends ServiceImpl<SubmissionMapper, Submiss
         Problem problem = problemService.getById(submission.getProblemId());
         judgeUtil.judge(submission,problem, JUDGE_URL, JudgeUtil.token);
         return Result.success(submission);
+    }
+
+    @Override
+    public Object listPage(Integer page, Integer limit, Integer result, String username) {
+        QueryWrapper wrapper = new QueryWrapper();
+        if( result != null ) {
+            wrapper.where(SUBMISSION.RESULT.eq(result));
+        }
+        if( username != null ) {
+            wrapper.where(SUBMISSION.USERNAME.eq(username));
+        }
+        wrapper.where(SUBMISSION.CONTEST_ID.isNull());
+        wrapper.orderBy(SUBMISSION.CREATE_TIME.desc());
+        return submissionMapper.paginateWithRelationsAs(page, limit, wrapper, VOSubmissionList.class );
     }
 }
