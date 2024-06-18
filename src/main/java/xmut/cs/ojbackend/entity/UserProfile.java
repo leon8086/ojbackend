@@ -63,8 +63,8 @@ public class UserProfile implements Serializable {
 
     private String language;
 
-    @RelationOneToOne(selfField = "userId", targetField = "id")
-    private User user;
+    //@RelationOneToOne(selfField = "userId", targetField = "id")
+    //private User user;
 
     public void addScore(int score) {
         this.totalScore += score;

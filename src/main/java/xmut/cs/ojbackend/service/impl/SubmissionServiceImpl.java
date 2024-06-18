@@ -10,6 +10,7 @@ import xmut.cs.ojbackend.entity.Problem;
 import xmut.cs.ojbackend.entity.Submission;
 import xmut.cs.ojbackend.entity.User;
 import xmut.cs.ojbackend.entity.VO.VOSubmissionList;
+import xmut.cs.ojbackend.entity.VO.VOSubmissionResult;
 import xmut.cs.ojbackend.mapper.SubmissionMapper;
 import xmut.cs.ojbackend.service.ProblemService;
 import xmut.cs.ojbackend.service.SubmissionService;
@@ -72,5 +73,15 @@ public class SubmissionServiceImpl extends ServiceImpl<SubmissionMapper, Submiss
         wrapper.where(SUBMISSION.CONTEST_ID.isNull());
         wrapper.orderBy(SUBMISSION.CREATE_TIME.desc());
         return submissionMapper.paginateWithRelationsAs(page, limit, wrapper, VOSubmissionList.class );
+    }
+
+    @Override
+    public Object getSubmitResult(String id) {
+        //QueryWrapper wrapper = new QueryWrapper();
+        //wrapper.select(SUBMISSION.ID, SUBMISSION.RESULT, SUBMISSION.USER_ID, SUBMISSION.PROBLEM_ID, SUBMISSION.INFO);
+        //wrapper.where(SUBMISSION.ID.eq(id));
+        //VOSubmissionResult res = submissionMapper.selectOneByQueryAs(wrapper, VOSubmissionResult.class);
+        VOSubmissionResult res = submissionMapper.selectOneWithRelationsByIdAs(id,VOSubmissionResult.class);
+        return res;
     }
 }

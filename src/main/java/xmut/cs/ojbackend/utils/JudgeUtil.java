@@ -27,9 +27,6 @@ import java.util.Map;
 public class JudgeUtil {
 
     @Autowired
-    RedisUtil redisUtil;
-
-    @Autowired
     private OptionsSysoptionsService optionsSysoptionsService;
 
     @Autowired
@@ -54,7 +51,7 @@ public class JudgeUtil {
     private OiContestRankService oiContestRankService;
 
     @Value("${judge-server.url}")
-    private static String JudgeServerUrl;
+    private String JudgeServerUrl;
 
     public static final int COMPILE_ERROR = -2;
 
@@ -183,14 +180,11 @@ public class JudgeUtil {
         // 处理判题任务的逻辑，包括编译、运行等步骤
         // 通过异步队列或者消息队列发送判题任务
         // 可以在这里调用判题服务的接口或者方法
-        if (redisUtil.llen("task_queue") == 0) {
-            return;
-        }
-        JSONObject task = (JSONObject) redisUtil.rPop("task_queue");
-        Submission submission = (Submission) task.get("submission");
-        Problem problem = (Problem) task.get("problem");
+        //JSONObject task = (JSONObject) redisUtil.rPop("task_queue");
+        //Submission submission = (Submission) task.get("submission");
+        //Problem problem = (Problem) task.get("problem");
 
-        judge(submission, problem, JudgeServerUrl, token);
+        //judge(submission, problem, JudgeServerUrl, token);
     }
 
     private void computeStatisticInfo(Submission submission, JSONArray testData, Problem problem) {
@@ -264,9 +258,9 @@ public class JudgeUtil {
     //        if self.contest.rule_type == ContestRuleType.OI or self.contest.real_time_rank:
 //            cache.delete(f"{CacheKey.contest_rank_cache}:{self.contest.id}")
     private void update_contest_rank(Submission submission, Problem problem, Contest contest) {
-        if (contest.getRuleType().equals("OI") || contest.getRealTimeRank()) {
-            redisUtil.del("contest_rank_cache:" + contest.getId());
-        }
+        //if (contest.getRuleType().equals("OI") || contest.getRealTimeRank()) {
+        //    redisUtil.del("contest_rank_cache:" + contest.getId());
+        //}
         OiContestRank oiContestRank = oiContestRankService.getByUserIdAndContestId(submission.getUserId(), contest.getId());
         if (oiContestRank == null) {
             oiContestRank = new OiContestRank(contest.getId(), submission.getUserId());

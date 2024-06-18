@@ -1,13 +1,17 @@
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${OJDEV_DEVSERVER}:5432/onlinejudge?stringtype=unspecified
+    url: jdbc:postgresql://localhost:5432/onlinejudge?stringtype=unspecified
     username: onlinejudge
     password: onlinejudge
   main:
     banner-mode: "off"
     lazy-initialization: true
-
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      database: 0
 mybatis-flex:
 #  configuration:
 #    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
@@ -20,7 +24,7 @@ server:
   port: 8081
 
 judge-server:
-  url: http://${OJDEV_DEVSERVER}:8080/judge
+  url: http://localhost:8080/judge
 
 files:
   upload:

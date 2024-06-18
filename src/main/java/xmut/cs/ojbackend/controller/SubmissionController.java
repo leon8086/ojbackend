@@ -85,10 +85,14 @@ public class SubmissionController {
         return ret;
     }
 
-    private Integer problemId;
-    @PostMapping("get")
-    public Object getInfo( @RequestBody Submission submission) {
-        return Result.success(submissionService.getById(submission.getId()));
+    @GetMapping("get")
+    public Object getInfo( String id ) {
+        return Result.success(submissionService.getById(id));
+    }
+
+    @GetMapping("result")
+    public Object getResult( String id ) {
+        return Result.success(submissionService.getSubmitResult(id));
     }
 
     /**

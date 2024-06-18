@@ -1,9 +1,8 @@
 package xmut.cs.ojbackend.entity;
 
-import com.mybatisflex.annotation.Column;
-import com.mybatisflex.annotation.Id;
-import com.mybatisflex.annotation.KeyType;
-import com.mybatisflex.annotation.Table;
+import com.mybatisflex.annotation.*;
+
+import java.io.Serial;
 import java.io.Serializable;
 
 import lombok.AllArgsConstructor;
@@ -24,6 +23,7 @@ import lombok.NoArgsConstructor;
 @Table(value = "user")
 public class User implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Id(keyType = KeyType.Auto)
@@ -48,6 +48,9 @@ public class User implements Serializable {
     private Boolean isDisabled;
 
     private String problemPermission;
+
+    @RelationOneToOne(selfField = "id", targetField = "userId")
+    UserProfile userProfile;
 
     public User(String username, String password) {
         this.password = password;

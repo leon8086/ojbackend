@@ -18,6 +18,6 @@ public class Result {
         return new Result(100,"success", data);
     }
     public static Result error( String msg ){
-        return new Result(100, msg, null );
+        return new Result(200, msg, null );
     }
 }

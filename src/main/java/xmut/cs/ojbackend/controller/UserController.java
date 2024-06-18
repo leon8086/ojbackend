@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.beans.factory.annotation.Autowired;
+import xmut.cs.ojbackend.base.Result;
 import xmut.cs.ojbackend.entity.User;
 import xmut.cs.ojbackend.service.UserService;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,6 +35,16 @@ public class UserController {
      * @param user 
      * @return {@code true} 添加成功，{@code false} 添加失败
      */
+    @PostMapping("login")
+    public Object login( @RequestBody User user){
+        return userService.login(user);
+    }
+
+    @PostMapping("logout")
+    public Object logout(){
+        return userService.logout();
+    }
+
     @PostMapping("save")
     public boolean save(@RequestBody User user) {
         return userService.save(user);
@@ -60,6 +71,7 @@ public class UserController {
     public boolean update(@RequestBody User user) {
         return userService.updateById(user);
     }
+
 
     /**
      * 查询所有。
