@@ -92,7 +92,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             authentication = authenticationManager.authenticate(authenticationToken);
         }
         catch( Exception e ){
-            return Result.error("用户名或密码错误");
+            return Result.loginFailed();
         }
         LoginUser loginUser = (LoginUser)authentication.getPrincipal();
         User redisUser = this.mapper.selectOneWithRelationsById(loginUser.getUser().getId());

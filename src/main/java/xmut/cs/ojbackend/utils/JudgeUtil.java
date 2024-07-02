@@ -4,11 +4,8 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.springframework.beans.factory.annotation.Value;
-import xmut.cs.ojbackend.entity.*;
-import xmut.cs.ojbackend.mapper.SubmissionMapper;
-import xmut.cs.ojbackend.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -16,10 +13,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import xmut.cs.ojbackend.entity.*;
+import xmut.cs.ojbackend.mapper.SubmissionMapper;
+import xmut.cs.ojbackend.mapper.exam.ExamSubmissionMapper;
+import xmut.cs.ojbackend.service.*;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Map;
 
 
 @Component
@@ -40,6 +40,9 @@ public class JudgeUtil {
 
     @Autowired
     private SubmissionMapper submissionMapper;
+
+    @Autowired
+    private ExamSubmissionMapper examSubmissionMapper;
 
     @Autowired
     private CommonUtil commonUtil;
@@ -104,26 +107,22 @@ public class JudgeUtil {
         return config;
     }
 
-    @Async
-    public void judge( Submission submission, Problem problem, String judgeUrl, String token ) throws JsonProcessingException{
-        //向判题服务器发送post请求
+    public JSONObject getJudgeResult( Problem problem, String code, String language, String judgeUrl, String token ) throws JsonProcessingException {
         RestTemplate restTemplate = new RestTemplate();
 
-        String code = submission.getCode();
-        if(!problem.getTemplate().isEmpty() && !problem.getTemplate().getString(submission.getLanguage()).isEmpty()) {
-            code = commonUtil.applyCPPTemplate(problem.getTemplate().getString(submission.getLanguage()), code);
+        if(!problem.getTemplate().isEmpty() && !problem.getTemplate().getString(language).isEmpty()) {
+            code = commonUtil.applyCPPTemplate(problem.getTemplate().getString(language), code);
         }
         else{
             code = code;
         }
-        //submission.(code);
         //创建请求头
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.add("X-Judge-Server-Token", sha256(token));
 
         JSONObject taskInfo = new JSONObject();
-        taskInfo.put("language_config", getLanguageConfig(submission.getLanguage()));
+        taskInfo.put("language_config", getLanguageConfig(language));
         taskInfo.put("src", code);
         taskInfo.put("max_cpu_time", problem.getTimeLimit());
         taskInfo.put("max_memory", problem.getMemoryLimit() * 1024 * 1024);
@@ -138,7 +137,27 @@ public class JudgeUtil {
         //发送请求
         ResponseEntity<String> responseEntity = restTemplate.postForEntity(judgeUrl, entity, String.class);
         String data = responseEntity.getBody();
-        JSONObject result = JSON.parseObject(data);
+        return JSON.parseObject(data);
+    }
+    @Async
+    public void judgeExam( ExamSubmission examSubmission, Problem problem, String judgeUrl, String token ) throws JsonProcessingException{
+        //向判题服务器发送post请求
+        judge(examSubmission, problem, judgeUrl, token);
+        examSubmissionMapper.update(examSubmission);
+        // 更新exam的状态
+    }
+    @Async
+    public void judgeNormal( Submission submission, Problem problem, String judgeUrl, String token ) throws JsonProcessingException {
+        judge(submission, problem, judgeUrl, token);
+        submissionMapper.update(submission);
+        update_problem_status(submission, problem);
+        update_userprofile(submission, problem);
+    }
+
+    @Async
+    public void judge( Submission submission, Problem problem, String judgeUrl, String token ) throws JsonProcessingException{
+        JSONObject result = getJudgeResult(problem, submission.getCode(), submission.getLanguage(), judgeUrl, token);
+        System.out.println(result);
         if (result.get("err") != null) {
             JSONObject staticInfo = new JSONObject();
             staticInfo.put("err_info", result.get("data"));
@@ -166,25 +185,6 @@ public class JudgeUtil {
                 submission.setResult(WRONG_ANSWER);
             }
         }
-        submissionMapper.update(submission);
-        update_problem_status(submission, problem);
-        if (submission.getContestId() != null) {
-            Contest contest = contestService.getById(submission.getContestId());
-            update_contest_rank(submission, problem, contest);
-        } else {
-            update_userprofile(submission, problem);
-        }
-    }
-    @Async
-    public void judge() throws JsonProcessingException {
-        // 处理判题任务的逻辑，包括编译、运行等步骤
-        // 通过异步队列或者消息队列发送判题任务
-        // 可以在这里调用判题服务的接口或者方法
-        //JSONObject task = (JSONObject) redisUtil.rPop("task_queue");
-        //Submission submission = (Submission) task.get("submission");
-        //Problem problem = (Problem) task.get("problem");
-
-        //judge(submission, problem, JudgeServerUrl, token);
     }
 
     private void computeStatisticInfo(Submission submission, JSONArray testData, Problem problem) {
@@ -267,6 +267,9 @@ public class JudgeUtil {
             oiContestRankService.save(oiContestRank);
         }
         update_oi_contest_rank(submission, problem, contest, oiContestRank);
+    }
+
+    private void update_exam_info(ExamSubmission examSubmission, Problem problem, Exam exam) {
     }
 
     private void update_oi_contest_rank(Submission submission, Problem problem, Contest contest, OiContestRank oiContestRank) {

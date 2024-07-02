@@ -1,10 +1,7 @@
 package xmut.cs.ojbackend.entity.VO;
 
 import com.alibaba.fastjson2.JSONObject;
-import com.mybatisflex.annotation.Column;
-import com.mybatisflex.annotation.Id;
-import com.mybatisflex.annotation.KeyType;
-import com.mybatisflex.annotation.Table;
+import com.mybatisflex.annotation.*;
 import com.mybatisflex.core.handler.Fastjson2TypeHandler;
 import com.mybatisflex.core.keygen.KeyGenerators;
 import lombok.AllArgsConstructor;
@@ -64,4 +61,6 @@ public class VOSubmissionDetail implements Serializable {
 
     private String ip;
 
+    @RelationOneToOne(selfField="problemId", targetField="id")
+    private VOProblemDetail voProblemDetail;
 }

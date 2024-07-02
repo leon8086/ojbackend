@@ -18,4 +18,8 @@ public interface SubmissionService extends IService<Submission> {
     public Object listPage(Integer page, Integer limit, Integer result, String username);
 
     public Object getSubmitResult( String id );
+
+    Object getInfo(String id);
+
+    Object listExam();
 }

@@ -23,10 +23,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.stereotype.Component;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 import xmut.cs.ojbackend.entity.LoginUser;
 import xmut.cs.ojbackend.entity.User;
-import xmut.cs.ojbackend.mapper.UserMapper;
 import xmut.cs.ojbackend.utils.JwtUtil;
 import xmut.cs.ojbackend.utils.Pkdf2Encoder;
 
@@ -43,7 +45,10 @@ public class WebSecurityConfig {
     private JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter;
 
     @Autowired
-    private DelegatedAuthenticationEntryPoint delegatedAuthenticationEntryPoint;
+    private CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+
+    @Autowired
+    private CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder(){
@@ -54,6 +59,8 @@ public class WebSecurityConfig {
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
         http.authorizeHttpRequests(
                 request->request.requestMatchers("/problem/*").permitAll()
+                        .requestMatchers("/opt_info/*").permitAll()
+                        .requestMatchers("/tag/*").permitAll()
                         .requestMatchers("user/login").permitAll()
                         .anyRequest().authenticated()
         )
@@ -61,8 +68,18 @@ public class WebSecurityConfig {
                 .httpBasic(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable);
         http.exceptionHandling(
-                handling -> handling.authenticationEntryPoint(delegatedAuthenticationEntryPoint)
+                handling -> handling.authenticationEntryPoint(customAuthenticationEntryPoint)
+                                    .accessDeniedHandler(customAccessDeniedHandler)
         );
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+        corsConfiguration.setAllowCredentials(true);
+        corsConfiguration.addAllowedOriginPattern("*");
+        corsConfiguration.addAllowedHeader("*");
+        corsConfiguration.addAllowedMethod("*");
+        UrlBasedCorsConfigurationSource url = new UrlBasedCorsConfigurationSource();
+        url.registerCorsConfiguration("/**",corsConfiguration);
+        http.cors( p->p.configurationSource(url));
+
         http.addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
@@ -78,27 +95,34 @@ public class WebSecurityConfig {
     @Component
     public static class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         @Autowired
-        UserMapper userMapper;
-
-        @Autowired
         RedisTemplate<Object, Object> redisTemplate;
 
+        @Autowired
+        private HandlerExceptionResolver handlerExceptionResolver;
+
         @Override
-        protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-            String token = request.getHeader("Authorization");
+        protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)throws ServletException, IOException {
+            try {
+                String token = request.getHeader("Authorization");
 
-            if( token == null || token.isEmpty()){
-                filterChain.doFilter(request, response );
-                return;
+                if (token == null || token.isEmpty()) {
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+
+                //throw new RuntimeException("error");
+                Integer userId = (Integer) JwtUtil.parseToken(token, "id");
+                JSONObject tmp = (JSONObject) redisTemplate.opsForValue().get("user-id:" + userId.toString());
+                if (tmp != null) {
+                    User user = tmp.toJavaObject(User.class);
+                    LoginUser loginUser = new LoginUser(user);
+                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginUser, null, null);
+                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                }
             }
-
-            Integer userId  = (Integer) JwtUtil.parseToken(token,"id");
-            JSONObject tmp = (JSONObject)redisTemplate.opsForValue().get("user-id:"+userId.toString());
-            if(tmp != null ) {
-                User user = tmp.toJavaObject(User.class);
-                LoginUser loginUser = new LoginUser(user);
-                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginUser, null, null);
-                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            catch( Exception e){
+                handlerExceptionResolver.resolveException(request, response, null, e );
+                return;
             }
             filterChain.doFilter(request, response );
         }

@@ -1,23 +1,19 @@
 package xmut.cs.ojbackend.service.impl;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONObject;
-import com.mybatisflex.core.handler.Fastjson2TypeHandler;
-import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import xmut.cs.ojbackend.base.Result;
 import xmut.cs.ojbackend.entity.Problem;
 import xmut.cs.ojbackend.entity.VO.VOProblemDetail;
 import xmut.cs.ojbackend.entity.VO.VOProblemTitle;
 import xmut.cs.ojbackend.entity.entitymapper.VoProblemTitleWrapper;
 import xmut.cs.ojbackend.mapper.ProblemMapper;
 import xmut.cs.ojbackend.service.ProblemService;
-import org.springframework.stereotype.Service;
 import xmut.cs.ojbackend.utils.CommonUtil;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 import static xmut.cs.ojbackend.entity.table.ProblemTableDef.PROBLEM;
 import static xmut.cs.ojbackend.entity.table.ProblemTagTableDef.PROBLEM_TAG;
@@ -80,15 +76,19 @@ public class ProblemServiceImpl extends ServiceImpl<ProblemMapper, Problem> impl
         wrapper.select().where(PROBLEM.ID.eq(id));
         VOProblemDetail problem = problemMapper.selectOneWithRelationsByQueryAs(wrapper, VOProblemDetail.class);
         //problem.getTemplate()
-        Map<String, String> template = new HashMap<String,String>();
-        if(!problem.getTemplate().isEmpty()) {
-            for( String key : problem.getTemplate().keySet()){
-                String src = problem.getTemplate().getString(key);
-                template.put(key, commonUtil.findStringBetween(src, "//TEMPLATE BEGIN", "//TEMPLATE END"));
-            }
-            JSONObject obj = JSON.parseObject(JSON.toJSONString(template));
-            problem.setTemplate(obj);
-        }
+        commonUtil.replaceTemplate(problem);
         return problem;
+    }
+
+    @Override
+    public Object getExamProblems(Integer id) {
+        QueryWrapper wrapper = new QueryWrapper();
+        wrapper.where(PROBLEM.CONTEST_ID.eq(id));
+        wrapper.orderBy(PROBLEM.DISPLAY_ID.asc());
+        List<VOProblemDetail> problemDetailList = problemMapper.selectListByQueryAs( wrapper, VOProblemDetail.class);
+        for( VOProblemDetail problem : problemDetailList){
+            commonUtil.replaceTemplate(problem);
+        }
+        return Result.success(problemDetailList);
     }
 }

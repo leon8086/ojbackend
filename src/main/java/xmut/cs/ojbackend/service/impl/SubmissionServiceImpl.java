@@ -5,16 +5,18 @@ import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 import xmut.cs.ojbackend.base.Result;
 import xmut.cs.ojbackend.entity.Problem;
 import xmut.cs.ojbackend.entity.Submission;
 import xmut.cs.ojbackend.entity.User;
+import xmut.cs.ojbackend.entity.VO.VOSubmissionDetail;
+import xmut.cs.ojbackend.entity.VO.VOSubmissionExamList;
 import xmut.cs.ojbackend.entity.VO.VOSubmissionList;
 import xmut.cs.ojbackend.entity.VO.VOSubmissionResult;
 import xmut.cs.ojbackend.mapper.SubmissionMapper;
 import xmut.cs.ojbackend.service.ProblemService;
 import xmut.cs.ojbackend.service.SubmissionService;
-import org.springframework.stereotype.Service;
 import xmut.cs.ojbackend.service.UserService;
 import xmut.cs.ojbackend.utils.JudgeUtil;
 
@@ -55,9 +57,12 @@ public class SubmissionServiceImpl extends ServiceImpl<SubmissionMapper, Submiss
         submission.setIp(ip);
         submission.setUserId(userId);
         submission.setUsername(user.getUsername());
+        //System.out.println(submission);
         save(submission);
+        //System.out.println(submission);
         Problem problem = problemService.getById(submission.getProblemId());
-        judgeUtil.judge(submission,problem, JUDGE_URL, JudgeUtil.token);
+        judgeUtil.judgeNormal(submission,problem, JUDGE_URL, JudgeUtil.token);
+        //System.out.println(submission);
         return Result.success(submission);
     }
 
@@ -83,5 +88,20 @@ public class SubmissionServiceImpl extends ServiceImpl<SubmissionMapper, Submiss
         //VOSubmissionResult res = submissionMapper.selectOneByQueryAs(wrapper, VOSubmissionResult.class);
         VOSubmissionResult res = submissionMapper.selectOneWithRelationsByIdAs(id,VOSubmissionResult.class);
         return res;
+    }
+
+    @Override
+    public Object getInfo(String id) {
+        VOSubmissionDetail res = this.mapper.selectOneWithRelationsByIdAs(id, VOSubmissionDetail.class);
+        return Result.success(res);
+    }
+
+    @Override
+    public Object listExam() {
+        QueryWrapper wrapper = new QueryWrapper();
+        wrapper.limit(10);
+        wrapper.where(SUBMISSION.CONTEST_ID.isNull());
+        wrapper.orderBy(SUBMISSION.CREATE_TIME.desc());
+        return Result.success(submissionMapper.selectListByQueryAs( wrapper, VOSubmissionExamList.class ));
     }
 }

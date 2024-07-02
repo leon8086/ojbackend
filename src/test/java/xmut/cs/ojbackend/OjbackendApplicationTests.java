@@ -7,14 +7,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import xmut.cs.ojbackend.entity.Exam;
 import xmut.cs.ojbackend.entity.Submission;
 import xmut.cs.ojbackend.entity.User;
 import xmut.cs.ojbackend.service.ProblemService;
 import xmut.cs.ojbackend.service.SubmissionService;
 import xmut.cs.ojbackend.service.UserService;
+import xmut.cs.ojbackend.service.exam.ExamService;
 import xmut.cs.ojbackend.utils.JwtUtil;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@SpringBootTest
 class OjbackendApplicationTests {
 
     @Autowired
@@ -31,6 +33,9 @@ class OjbackendApplicationTests {
 
     @Autowired
     UserDetailsService userDetailsService;
+
+    @Autowired
+    ExamService examService;
 
     @Test
     void contextLoads() {
@@ -112,5 +117,17 @@ class OjbackendApplicationTests {
     void testLogin(){
         User user = new User("root", "rootroot");
         System.out.println( userService.login(user) );
+    }
+
+    @Test
+    void testExamList(){
+        Exam exam = new Exam();
+        exam.setId(12);
+        examService.getProblems(exam);
+    }
+
+    @Test
+    void testExamDetail(){
+        System.out.println(examService.getExamDetail(12));
     }
 }

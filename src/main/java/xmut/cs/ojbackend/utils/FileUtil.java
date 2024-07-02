@@ -27,15 +27,15 @@ public class FileUtil {
 
     public Result uploadAvatar(MultipartFile file) {
         if (file.isEmpty()) {
-            return Result.error("Invalid file content");
+            return Result.error(Result.INVALID_FILE_CONTENT);
         }
         if (file.getSize() > 2 * 1024 * 1024) {
-            return Result.error("Picture is too large");
+            return Result.error(Result.FILE_TOO_LARGE);
         }
         String fileName = file.getOriginalFilename();
         String suffix = fileName.substring(fileName.lastIndexOf(".")).toLowerCase();
         if (!Arrays.asList(".gif", ".jpg", ".jpeg", ".bmp", ".png").contains(suffix)) {
-            return Result.error("Unsupported file format");
+            return Result.error(Result.UNSUPPORTED_FILE);
         }
         String name = UUID.randomUUID().toString().replace("-", "") + suffix;
         try {
@@ -45,7 +45,7 @@ public class FileUtil {
             return Result.success(AVATAR_URI_PREFIX + "/" + name);
         } catch (IOException e) {
             e.printStackTrace();
-            return Result.error("Failed to uploadAvatar");
+            return Result.error(Result.UPLOAD_FAILED);
         }
     }
 

@@ -1,17 +1,15 @@
-package xmut.cs.ojbackend.entity;
+package xmut.cs.ojbackend.entity.VO;
 
 import com.alibaba.fastjson2.JSONObject;
-import com.mybatisflex.annotation.Column;
-import com.mybatisflex.annotation.Id;
-import com.mybatisflex.annotation.KeyType;
-import com.mybatisflex.annotation.Table;
+import com.mybatisflex.annotation.*;
 import com.mybatisflex.core.handler.Fastjson2TypeHandler;
 import com.mybatisflex.core.keygen.KeyGenerators;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -22,12 +20,13 @@ import java.util.Date;
  * @since 2024-06-03
  */
 @Data
-@SuperBuilder
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(value = "submission")
-public class Submission implements Serializable {
+public class VOSubmissionExamList implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Id(keyType = KeyType.Generator, value = KeyGenerators.snowFlakeId)
@@ -37,20 +36,20 @@ public class Submission implements Serializable {
 
     private Integer problemId;
 
-    @Column(ignore = true)
-    private String problemDisplayId;
+    @RelationOneToOne(selfField="problemId", targetField="id")
+    private VOProblemBrief voProblemBrief;
+
+    @Column(onInsertValue = "'{}'", typeHandler = Fastjson2TypeHandler.class)
+    private JSONObject info;
+
+    private String code;
 
     private Date createTime;
 
     private Integer userId;
 
-    private String code;
-
     @Column(onInsertValue = "6")
     private Integer result;
-
-    @Column(onInsertValue = "'{}'", typeHandler = Fastjson2TypeHandler.class)
-    private JSONObject info;
 
     private String language;
 
@@ -61,7 +60,4 @@ public class Submission implements Serializable {
     private JSONObject statisticInfo;
 
     private String username;
-
-    private String ip;
-
 }

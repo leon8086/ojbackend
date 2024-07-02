@@ -12,6 +12,9 @@ spring:
       host: 127.0.0.1
       port: 6379
       database: 0
+  mvc:
+    dispatch-options-request: true
+
 mybatis-flex:
 #  configuration:
 #    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

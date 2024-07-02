@@ -13,4 +13,6 @@ public interface ProblemService extends IService<Problem> {
     public Object listPage(Integer page, Integer limit, String keyword, String difficulty, String tag);
 
     public Object info( Integer id );
+
+    Object getExamProblems(Integer id);
 }

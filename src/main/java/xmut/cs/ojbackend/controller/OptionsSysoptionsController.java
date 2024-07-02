@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.beans.factory.annotation.Autowired;
+import xmut.cs.ojbackend.base.Result;
 import xmut.cs.ojbackend.entity.OptionsSysoptions;
 import xmut.cs.ojbackend.service.OptionsSysoptionsService;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,7 +23,7 @@ import java.util.List;
  * @since 2024-06-03
  */
 @RestController
-@RequestMapping("/optionsSysoptions")
+@RequestMapping("/opt_info")
 public class OptionsSysoptionsController {
 
     @Autowired
@@ -67,8 +68,9 @@ public class OptionsSysoptionsController {
      * @return 所有数据
      */
     @GetMapping("list")
-    public List<OptionsSysoptions> list() {
-        return optionsSysoptionsService.list();
+    public Object list() {
+        Result ret = optionsSysoptionsService.getInfo();
+        return optionsSysoptionsService.getInfo();
     }
 
     /**

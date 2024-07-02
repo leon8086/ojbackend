@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -25,6 +26,7 @@ import java.util.Date;
 @Table(value = "submission")
 public class VOSubmissionList implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Id(keyType = KeyType.Generator, value = KeyGenerators.snowFlakeId)
@@ -35,7 +37,7 @@ public class VOSubmissionList implements Serializable {
     private Integer problemId;
 
     @RelationOneToOne(selfField="problemId", targetField="id")
-     private VOProblemBrief voProblemBrief;
+    private VOProblemBrief voProblemBrief;
 
     private Date createTime;
 
