@@ -1,7 +1,9 @@
 spring:
+  profiles:
+    active: dev
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/onlinejudge?stringtype=unspecified
+    url: jdbc:postgresql://localhost:5433/onlinejudge?stringtype=unspecified
     username: onlinejudge
     password: onlinejudge
   main:
@@ -28,10 +30,3 @@ server:
 
 judge-server:
   url: http://localhost:8080/judge
-
-files:
-  upload:
-    testCase:
-      path: data/testCase/
-    avatar:
-      path: data/public/avatar/

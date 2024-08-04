@@ -16,9 +16,11 @@ public class CourseTableDef extends TableDef {
 
     public final QueryColumn ID = new QueryColumn(this, "id");
 
-    public final QueryColumn NAME = new QueryColumn(this, "name");
+    public final QueryColumn OWNER_ID = new QueryColumn(this, "owner_id");
 
-    public final QueryColumn COURSE_OWNER = new QueryColumn(this, "course_owner");
+    public final QueryColumn IS_CLOSED = new QueryColumn(this, "is_closed");
+
+    public final QueryColumn COURSE_NAME = new QueryColumn(this, "course_name");
 
     /**
      * 所有字段。
@@ -28,7 +30,7 @@ public class CourseTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, NAME, COURSE_OWNER};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, OWNER_ID, IS_CLOSED, COURSE_NAME};
 
     public CourseTableDef() {
         super("", "course");

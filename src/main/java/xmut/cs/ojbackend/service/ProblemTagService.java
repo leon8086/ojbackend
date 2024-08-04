@@ -11,4 +11,7 @@ import xmut.cs.ojbackend.entity.ProblemTag;
  */
 public interface ProblemTagService extends IService<ProblemTag> {
 
+    Object adminListMajor( String keyword );
+
+    Object addTag(String name, Integer parentId);
 }

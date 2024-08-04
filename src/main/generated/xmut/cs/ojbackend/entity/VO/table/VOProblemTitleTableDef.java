@@ -12,13 +12,19 @@ public class VOProblemTitleTableDef extends TableDef {
 
     public final QueryColumn TITLE = new QueryColumn(this, "title");
 
-    public final QueryColumn CONTEST_ID = new QueryColumn(this, "contest_id");
+    public final QueryColumn SUB_TAG = new QueryColumn(this, "sub_tag");
 
-    public final QueryColumn DISPLAY_ID = new QueryColumn(this, "_id");
+    public final QueryColumn MAJOR_TAG = new QueryColumn(this, "major_tag");
+
+    public final QueryColumn SUB_TAG_ID = new QueryColumn(this, "sub_tag_id");
+
+    public final QueryColumn DISPLAY_ID = new QueryColumn(this, "display_id");
 
     public final QueryColumn LANGUAGES = new QueryColumn(this, "languages");
 
     public final QueryColumn DIFFICULTY = new QueryColumn(this, "difficulty");
+
+    public final QueryColumn MAJOR_TAG_ID = new QueryColumn(this, "major_tag_id");
 
     public final QueryColumn ACCEPTED_NUMBER = new QueryColumn(this, "accepted_number");
 
@@ -32,7 +38,7 @@ public class VOProblemTitleTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, TITLE, CONTEST_ID, DISPLAY_ID, LANGUAGES, DIFFICULTY, ACCEPTED_NUMBER, SUBMISSION_NUMBER};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, TITLE, SUB_TAG, MAJOR_TAG, SUB_TAG_ID, DISPLAY_ID, LANGUAGES, DIFFICULTY, MAJOR_TAG_ID, ACCEPTED_NUMBER, SUBMISSION_NUMBER};
 
     public VOProblemTitleTableDef() {
         super("", "problem");

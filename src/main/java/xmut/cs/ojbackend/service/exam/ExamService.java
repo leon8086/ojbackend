@@ -32,4 +32,8 @@ public interface ExamService extends IService<Exam> {
     Object getSubmissionById(String id);
 
     ExamProfile getExamProfile(Integer userId, Integer examId);
+
+    Object listPage(Integer page, Integer limit, String keyword, String difficulty, String tag);
+
+    Object getExamRank(Integer examId);
 }

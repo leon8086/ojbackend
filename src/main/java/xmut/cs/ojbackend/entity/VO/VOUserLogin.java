@@ -1,14 +1,12 @@
 package xmut.cs.ojbackend.entity.VO;
 
-import com.mybatisflex.annotation.Column;
-import com.mybatisflex.annotation.Id;
-import com.mybatisflex.annotation.KeyType;
 import com.mybatisflex.annotation.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -24,15 +22,24 @@ import java.io.Serializable;
 @Table(value = "user")
 public class VOUserLogin implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private Integer id;
 
     private String username;
 
-    private String adminType;
+    private Integer adminType;
 
     private Boolean isDisabled;
 
     private String token;
+
+    private String avatar;
+
+    private String realName;
+
+    private String grade;
+
+    private String email;
 }

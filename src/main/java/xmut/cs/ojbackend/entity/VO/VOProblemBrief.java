@@ -1,15 +1,14 @@
 package xmut.cs.ojbackend.entity.VO;
 
-import com.mybatisflex.annotation.*;
-import com.mybatisflex.core.handler.Fastjson2TypeHandler;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.KeyType;
+import com.mybatisflex.annotation.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import xmut.cs.ojbackend.entity.ProblemTag;
 
 import java.io.Serializable;
-import java.util.List;
 
 @Data
 @Builder
@@ -22,8 +21,7 @@ public class VOProblemBrief implements Serializable {
 
     private String title;
 
-    @Column(value = "_id")
     private String displayId;
 
-    private Integer contestId;
+    private String difficulty;
 }

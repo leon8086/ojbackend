@@ -24,6 +24,10 @@ public class ExamProfileTableDef extends TableDef {
 
     public final QueryColumn USER_ID = new QueryColumn(this, "user_id");
 
+    public final QueryColumn IS_ENDED = new QueryColumn(this, "is_ended");
+
+    public final QueryColumn LAST_UPDATE = new QueryColumn(this, "last_update");
+
     public final QueryColumn PROBLEM_CONFIG = new QueryColumn(this, "problem_config");
 
     /**
@@ -34,7 +38,7 @@ public class ExamProfileTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, INFO, SCORE, EXAM_ID, USER_ID, PROBLEM_CONFIG};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, INFO, SCORE, EXAM_ID, USER_ID, IS_ENDED, LAST_UPDATE, PROBLEM_CONFIG};
 
     public ExamProfileTableDef() {
         super("", "exam_profile");

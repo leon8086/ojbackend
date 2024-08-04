@@ -29,4 +29,10 @@ public class AdminExamController {
     public Result get( Integer id ) {
         return Result.success(examService.getExamDetail(id));
     }
+
+    @GetMapping("list")
+    public Object list( Integer page, Integer limit, String keyword, String difficulty, String tag ){
+        Object ret = Result.success(examService.listPage(page, limit, keyword, difficulty, tag ));
+        return ret;
+    }
 }

@@ -12,6 +12,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -28,17 +29,13 @@ import java.util.Date;
 @Table(value = "submission")
 public class Submission implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Id(keyType = KeyType.Generator, value = KeyGenerators.snowFlakeId)
     private String id;
 
-    private Integer contestId;
-
     private Integer problemId;
-
-    @Column(ignore = true)
-    private String problemDisplayId;
 
     private Date createTime;
 
@@ -54,14 +51,10 @@ public class Submission implements Serializable {
 
     private String language;
 
-    @Column(onInsertValue = "false")
-    private Boolean shared;
-
     @Column(onInsertValue = "'{}'", typeHandler = Fastjson2TypeHandler.class)
     private JSONObject statisticInfo;
 
     private String username;
 
     private String ip;
-
 }

@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  *  实体类。
@@ -33,17 +34,21 @@ public class ExamProfile implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id(keyType = KeyType.Generator, value = KeyGenerators.snowFlakeId)
-    private Integer id;
+    private String id;
 
     private Integer examId;
 
     private Integer userId;
-
-    private Integer score;
 
     @Column(typeHandler = Fastjson2TypeHandler.class)
     private JSONArray problemConfig;
 
     @Column(typeHandler = Fastjson2TypeHandler.class)
     private JSONObject info;
+
+    private Integer score;
+
+    private Date lastUpdate;
+
+    private Boolean isEnded;
 }

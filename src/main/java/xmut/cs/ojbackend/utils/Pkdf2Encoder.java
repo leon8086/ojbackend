@@ -1,19 +1,17 @@
 package xmut.cs.ojbackend.utils;
 
 
-import org.springframework.stereotype.Component;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.Base64;
 import java.util.Random;
-
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 public class Pkdf2Encoder implements PasswordEncoder {
 
@@ -85,6 +83,8 @@ public class Pkdf2Encoder implements PasswordEncoder {
         Integer iterations = Integer.parseInt(parts[1]);
         String salt = parts[2];
         String hash = encode(password, salt, iterations);
+        System.out.println(hash);
+        System.out.println(hashedPassword);
 
         return hash.equals(hashedPassword);
     }

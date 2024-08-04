@@ -1,20 +1,25 @@
 package xmut.cs.ojbackend.entity;
 
-import com.mybatisflex.annotation.*;
-
-import java.io.Serial;
-import java.io.Serializable;
-
+import com.alibaba.fastjson2.JSONObject;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.KeyType;
+import com.mybatisflex.annotation.Table;
+import com.mybatisflex.core.handler.Fastjson2TypeHandler;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.Date;
+
 /**
  *  实体类。
  *
  * @author leon
- * @since 2024-06-03
+ * @since 2024-07-15
  */
 @Data
 @Builder
@@ -26,31 +31,51 @@ public class User implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
+    public static final Integer ADMINTYPE_REGULAR = 9;
+    public static final int ADMINTYPE_ADMIN = 2;
+    public static final int ADMINTYPE_SUPERADMIN = 1;
+
     @Id(keyType = KeyType.Auto)
     private Integer id;
 
-    @Column(isLarge = true)
     private String password;
 
-    private String lastLogin;
+    private Date lastLogin;
+
+    private Date createTime;
+
+    private Date resetPasswordTokenExpireTime;
 
     private String username;
 
     private String email;
 
-    @Column(onInsertValue = "to_char(now(), 'YYYY-MM-DD HH24:MI:SS')")
-    private String createTime;
+    @Column(onInsertValue = "9")
+    private Integer adminType;
 
-    @Column(onInsertValue = "'Regular User'")
-    private String adminType;
+    private String resetPasswordToken;
 
     @Column(onInsertValue = "false")
     private Boolean isDisabled;
 
-    private String problemPermission;
+    @Column(onInsertValue = "'/public/avatar/default.png'")
+    private String avatar;
 
-    @RelationOneToOne(selfField = "id", targetField = "userId")
-    UserProfile userProfile;
+    private String realName;
+
+    private String grade;
+
+    @Column(onInsertValue = "false")
+    private Boolean firstLogin;
+
+    @Column(onInsertValue = "0")
+    private Integer acceptedNumber;
+
+    @Column(onInsertValue = "0")
+    private Integer submissionNumber;
+
+    @Column(onInsertValue = "'{}'", typeHandler = Fastjson2TypeHandler.class)
+    private JSONObject problemsStatus;
 
     public User(String username, String password) {
         this.password = password;

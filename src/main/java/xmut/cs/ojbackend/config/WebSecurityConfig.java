@@ -1,6 +1,5 @@
 package xmut.cs.ojbackend.config;
 
-import com.alibaba.fastjson.JSONObject;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -58,10 +57,9 @@ public class WebSecurityConfig {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
         http.authorizeHttpRequests(
-                request->request.requestMatchers("/problem/*").permitAll()
-                        .requestMatchers("/opt_info/*").permitAll()
-                        .requestMatchers("/tag/*").permitAll()
-                        .requestMatchers("user/login").permitAll()
+                request->request
+                        .requestMatchers("/user/login").permitAll()
+                        //.requestMatchers("/admin/problem/export").permitAll()
                         .anyRequest().authenticated()
         )
         .formLogin(Customizer.withDefaults())
@@ -110,15 +108,15 @@ public class WebSecurityConfig {
                     return;
                 }
 
-                //throw new RuntimeException("error");
                 Integer userId = (Integer) JwtUtil.parseToken(token, "id");
-                JSONObject tmp = (JSONObject) redisTemplate.opsForValue().get("user-id:" + userId.toString());
-                if (tmp != null) {
-                    User user = tmp.toJavaObject(User.class);
-                    LoginUser loginUser = new LoginUser(user);
-                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginUser, null, null);
-                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                User user = (User)redisTemplate.opsForValue().get("user-id:" + userId.toString());
+                if( user == null ){
+                    filterChain.doFilter(request, response);
+                    return;
                 }
+                LoginUser loginUser = new LoginUser(user);
+                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginUser, null, null);
+                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             }
             catch( Exception e){
                 handlerExceptionResolver.resolveException(request, response, null, e );

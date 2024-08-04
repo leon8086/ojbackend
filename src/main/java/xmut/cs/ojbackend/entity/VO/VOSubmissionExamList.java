@@ -32,8 +32,6 @@ public class VOSubmissionExamList implements Serializable {
     @Id(keyType = KeyType.Generator, value = KeyGenerators.snowFlakeId)
     private String id;
 
-    private Integer contestId;
-
     private Integer problemId;
 
     @RelationOneToOne(selfField="problemId", targetField="id")
@@ -52,9 +50,6 @@ public class VOSubmissionExamList implements Serializable {
     private Integer result;
 
     private String language;
-
-    @Column(onInsertValue = "false")
-    private Boolean shared;
 
     @Column(onInsertValue = "'{}'", typeHandler = Fastjson2TypeHandler.class)
     private JSONObject statisticInfo;

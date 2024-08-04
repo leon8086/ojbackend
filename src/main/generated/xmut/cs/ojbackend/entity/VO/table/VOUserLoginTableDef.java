@@ -16,7 +16,15 @@ public class VOUserLoginTableDef extends TableDef {
 
     public final QueryColumn ID = new QueryColumn(this, "id");
 
+    public final QueryColumn EMAIL = new QueryColumn(this, "email");
+
+    public final QueryColumn GRADE = new QueryColumn(this, "grade");
+
     public final QueryColumn TOKEN = new QueryColumn(this, "token");
+
+    public final QueryColumn AVATAR = new QueryColumn(this, "avatar");
+
+    public final QueryColumn REAL_NAME = new QueryColumn(this, "real_name");
 
     public final QueryColumn USERNAME = new QueryColumn(this, "username");
 
@@ -32,7 +40,7 @@ public class VOUserLoginTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, TOKEN, USERNAME, ADMIN_TYPE, IS_DISABLED};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, EMAIL, GRADE, TOKEN, AVATAR, REAL_NAME, USERNAME, ADMIN_TYPE, IS_DISABLED};
 
     public VOUserLoginTableDef() {
         super("", "user");

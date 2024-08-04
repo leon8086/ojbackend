@@ -2,6 +2,7 @@ package xmut.cs.ojbackend.service;
 
 import com.mybatisflex.core.service.IService;
 import xmut.cs.ojbackend.entity.Course;
+import xmut.cs.ojbackend.entity.DTO.DTOCourseImport;
 
 /**
  *  服务层。
@@ -11,4 +12,7 @@ import xmut.cs.ojbackend.entity.Course;
  */
 public interface CourseService extends IService<Course> {
 
+    Object listPage(Integer page, Integer limit, String keyword);
+
+    Object importStudent(DTOCourseImport course);
 }

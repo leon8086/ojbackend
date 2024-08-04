@@ -30,12 +30,7 @@ public class VOSubmissionDetail implements Serializable {
     @Id(keyType = KeyType.Generator, value = KeyGenerators.snowFlakeId)
     private String id;
 
-    private Integer contestId;
-
     private Integer problemId;
-
-    @Column(ignore = true)
-    private String problemDisplayId;
 
     private Date createTime;
 
@@ -50,9 +45,6 @@ public class VOSubmissionDetail implements Serializable {
     private JSONObject info;
 
     private String language;
-
-    @Column(onInsertValue = "false")
-    private Boolean shared;
 
     @Column(onInsertValue = "'{}'", typeHandler = Fastjson2TypeHandler.class)
     private JSONObject statisticInfo;

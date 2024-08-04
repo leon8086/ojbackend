@@ -50,12 +50,11 @@ public class SubmissionServiceImpl extends ServiceImpl<SubmissionMapper, Submiss
 
 
     @Override
-    public Object submitCode(Submission submission, String ip, Integer userId) throws JsonProcessingException {
+    public Object submitCode(Submission submission, String ip, User user) throws JsonProcessingException {
         Calendar calendar = Calendar.getInstance();
         submission.setCreateTime(calendar.getTime());
-        User user = userService.getById(userId);
         submission.setIp(ip);
-        submission.setUserId(userId);
+        submission.setUserId(user.getId());
         submission.setUsername(user.getUsername());
         //System.out.println(submission);
         save(submission);
@@ -75,7 +74,6 @@ public class SubmissionServiceImpl extends ServiceImpl<SubmissionMapper, Submiss
         if( username != null ) {
             wrapper.where(SUBMISSION.USERNAME.eq(username));
         }
-        wrapper.where(SUBMISSION.CONTEST_ID.isNull());
         wrapper.orderBy(SUBMISSION.CREATE_TIME.desc());
         return submissionMapper.paginateWithRelationsAs(page, limit, wrapper, VOSubmissionList.class );
     }
@@ -100,7 +98,6 @@ public class SubmissionServiceImpl extends ServiceImpl<SubmissionMapper, Submiss
     public Object listExam() {
         QueryWrapper wrapper = new QueryWrapper();
         wrapper.limit(10);
-        wrapper.where(SUBMISSION.CONTEST_ID.isNull());
         wrapper.orderBy(SUBMISSION.CREATE_TIME.desc());
         return Result.success(submissionMapper.selectListByQueryAs( wrapper, VOSubmissionExamList.class ));
     }

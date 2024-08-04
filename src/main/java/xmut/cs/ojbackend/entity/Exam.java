@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.sql.Timestamp;
+import java.util.Date;
 
 /**
  *  实体类。
@@ -39,17 +39,17 @@ public class Exam implements Serializable {
 
     private String description;
 
-    private Timestamp startTime;
+    private Date startTime;
 
-    private Timestamp endTime;
+    private Date endTime;
 
-    private Timestamp createTime;
+    private Date createTime;
 
-    private Timestamp lastUpdateTime;
+    private Date lastUpdateTime;
 
     private Boolean visible;
 
-    private Integer createdById;
+    private Integer courseId;
 
     @Column(typeHandler = Fastjson2TypeHandler.class)
     private JSONArray allowedIpRanges;

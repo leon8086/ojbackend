@@ -22,11 +22,11 @@ public class ExamTableDef extends TableDef {
 
     public final QueryColumn VISIBLE = new QueryColumn(this, "visible");
 
+    public final QueryColumn COURSE_ID = new QueryColumn(this, "course_id");
+
     public final QueryColumn START_TIME = new QueryColumn(this, "start_time");
 
     public final QueryColumn CREATE_TIME = new QueryColumn(this, "create_time");
-
-    public final QueryColumn CREATED_BY_ID = new QueryColumn(this, "created_by_id");
 
     public final QueryColumn DESCRIPTION = new QueryColumn(this, "description");
 
@@ -44,7 +44,7 @@ public class ExamTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, TITLE, END_TIME, VISIBLE, START_TIME, CREATE_TIME, CREATED_BY_ID, DESCRIPTION, PROBLEM_CONFIG, LAST_UPDATE_TIME, ALLOWED_IP_RANGES};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, TITLE, END_TIME, VISIBLE, COURSE_ID, START_TIME, CREATE_TIME, DESCRIPTION, PROBLEM_CONFIG, LAST_UPDATE_TIME, ALLOWED_IP_RANGES};
 
     public ExamTableDef() {
         super("", "exam");

@@ -5,6 +5,7 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import xmut.cs.ojbackend.entity.User;
 
+import java.util.Calendar;
 import java.util.Date;
 
 public class JwtUtil {
@@ -12,8 +13,9 @@ public class JwtUtil {
 
     static public String generateToken(User user) {
         Date start = new Date();
-        long currentTime = System.currentTimeMillis() + 60 * 60 * 1000 * 24 * 10;//24小时
-        Date end = new Date(currentTime);
+        Calendar calc = Calendar.getInstance();
+        calc.add(Calendar.DATE, 30);
+        Date end = calc.getTime();
         return JWT.create()
                 .withClaim("id", user.getId())
                 .withClaim("username", user.getUsername())

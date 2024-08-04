@@ -9,7 +9,7 @@ public class Codegen {
     public static void main(String[] args) {
         //配置数据源
         HikariDataSource dataSource = new HikariDataSource();
-        dataSource.setJdbcUrl("jdbc:postgresql://192.168.1.103:5432/onlinejudge");
+        dataSource.setJdbcUrl("jdbc:postgresql://192.168.1.103:5433/onlinejudge");
         dataSource.setUsername("onlinejudge");
         dataSource.setPassword("onlinejudge");
 
@@ -28,7 +28,7 @@ public class Codegen {
         GlobalConfig globalConfig = new GlobalConfig();
 
         //设置根包
-        globalConfig.setBasePackage("xmut.cs.ojbackend");
+        globalConfig.setBasePackage("xmut.cs.tmp");
 
         //设置表前缀和只生成哪些表
         globalConfig.setGenerateTable("user");
@@ -50,11 +50,17 @@ public class Codegen {
 
         //设置根包
         globalConfig.getPackageConfig()
-                .setBasePackage("xmut.cs.ojbackend");
+                .setBasePackage("xmut.cs.tmp");
 
         //设置表前缀和只生成哪些表，setGenerateTable 未配置时，生成所有表
         globalConfig.getStrategyConfig()
-                .setGenerateTable("exam","exam_profiles","exam_submissions");
+                .setGenerateTable( "course", "course_user", "exam", "exam_profile",
+                    "exam_submission","options_sysoptions",
+                    "problem", "problem_tag", "problem_tags", "submission", "user"
+                );
+                //.setGenerateTable("course_user");
+                //.setGenerateTable("user_table");
+                //.setGenerateTable("exam","exam_profiles","exam_submissions");
 //                .setGenerateTable(
 //                        "auth_group", "auth_group_permissions", "auth_permission",
 //                        "contest", "contest_announcement", "course",
@@ -70,11 +76,11 @@ public class Codegen {
         globalConfig.enableMapper();
 
         //设置生成 service()
-        globalConfig.enableService();
+        //globalConfig.enableService();
 
-        globalConfig.enableServiceImpl();
+        //globalConfig.enableServiceImpl();
 
-        globalConfig.enableController();
+        //globalConfig.enableController();
 
 
         return globalConfig;

@@ -11,7 +11,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import xmut.cs.ojbackend.entity.*;
-import xmut.cs.ojbackend.entity.VO.*;
+import xmut.cs.ojbackend.entity.VO.VOExamDetail;
+import xmut.cs.ojbackend.entity.VO.VOExamRank;
+import xmut.cs.ojbackend.entity.VO.VOProblemDetail;
+import xmut.cs.ojbackend.entity.VO.VOSubmissionDetail;
 import xmut.cs.ojbackend.entity.entitymapper.VoProblemDetailWrapper;
 import xmut.cs.ojbackend.entity.entitymapper.VoProblemTitleWrapper;
 import xmut.cs.ojbackend.mapper.ProblemMapper;
@@ -27,6 +30,7 @@ import java.util.*;
 
 import static xmut.cs.ojbackend.entity.table.ExamProfileTableDef.EXAM_PROFILE;
 import static xmut.cs.ojbackend.entity.table.ExamSubmissionTableDef.EXAM_SUBMISSION;
+import static xmut.cs.ojbackend.entity.table.ExamTableDef.EXAM;
 import static xmut.cs.ojbackend.entity.table.ProblemTableDef.PROBLEM;
 
 /**
@@ -83,57 +87,98 @@ public class ExamServiceImpl extends ServiceImpl<ExamMapper, Exam> implements Ex
         wrapper.and(EXAM_PROFILE.EXAM_ID.eq(examId));
         return examProfilesMapper.selectOneByQuery(wrapper);
     }
-    public void beginExam(User user, Exam exam, List<Integer> problemSet ){
+
+    @Override
+    public Object listPage(Integer page, Integer limit, String keyword, String difficulty, String tag) {
+        if (page == null) {
+            page = 1;
+        }
+        if (limit == null) {
+            limit = 1000;
+        }
+        QueryWrapper wrapper = new QueryWrapper();
+        if (keyword != null && !keyword.isEmpty()) {
+            wrapper.where(EXAM.TITLE.like(keyword));
+        }
+        wrapper.orderBy(EXAM.CREATE_TIME.desc());
+        return examMapper.paginateWithRelationsAs(page, limit, wrapper, VOExamDetail.class);
+    }
+
+    @Override
+    public Object getExamRank(Integer examId) {
+        QueryWrapper wrapper = new QueryWrapper();
+        wrapper.where(EXAM_PROFILE.EXAM_ID.eq(examId));
+        wrapper.orderBy(EXAM_PROFILE.SCORE.desc());
+        return examProfilesMapper.selectListWithRelationsByQueryAs( wrapper, VOExamRank.class);
+    }
+
+    public void beginExam(User user, Exam exam, JSONArray problemSet ){
         ExamProfile profile = new ExamProfile();
         profile.setUserId(user.getId());
         profile.setExamId(exam.getId());
-        profile.setProblemConfig(JSONArray.from(problemSet));
+        profile.setProblemConfig(problemSet);
         profile.setScore(0);
+        profile.setIsEnded(false);
         Map<String, Integer> info = new HashMap<String, Integer>();
-        for( Integer i : problemSet ){
-            info.put(i.toString(), 0 );
+        for( int i=0; i<problemSet.size(); ++i ){
+            JSONObject obj = (JSONObject) problemSet.get(i);
+            String id = ((Integer)obj.get("id")).toString();
+            info.put( id, 0 );
         }
         //System.out.println(JSON.toJSONString(info));
         //System.out.println(JSON.parseObject(JSON.toJSONString(info)));
+        Calendar calendar = Calendar.getInstance();
+        profile.setLastUpdate(calendar.getTime());
         profile.setInfo(JSON.parseObject(JSON.toJSONString(info)));
         examProfilesMapper.insert(profile);
     }
-    public List<Integer> getExamProblemSet( User user, Exam exam ){
-        ExamProfile profiles = getExamProfile( user.getId(), exam.getId() );
-        if( profiles != null ){
-            return profiles.getProblemConfig().toList(Integer.class);
-        }
+    public JSONArray genProblemSet( Exam exam ){
         JSONArray pArray = exam.getProblemConfig();
-        List<Integer> problems = new ArrayList<Integer>();
+        JSONArray problems = new JSONArray();
         for( int i=0; i<pArray.size(); ++i ){
             JSONObject job = pArray.getJSONObject(i);
             //System.out.println(job);
             int count = job.getIntValue("quantity");
-            List<Integer> base = job.getList("problems", Integer.class);
+            List<String> base = new ArrayList<String>(job.getJSONObject("problems").keySet());
             Collections.shuffle(base);  // 随机打乱
             for( int j=0; j<count; ++j){  // 取前n个
-                problems.add(base.get(j));
+                problems.add(job.getJSONObject("problems").get(base.get(j)));
             }
         }
-        beginExam(user, exam, problems);
         return problems;
+    }
+    public JSONArray getExamProblemSet( User user, Exam exam ){
+        ExamProfile profiles = getExamProfile( user.getId(), exam.getId() );
+        if( profiles != null ){
+            return profiles.getProblemConfig();
+        }
+        else {
+            JSONArray problems = genProblemSet(exam);
+            beginExam(user, exam, problems);
+            return problems;
+        }
     };
     @Override
     public Object getProblems(Exam exam) {
         exam = getById(exam.getId());
         LoginUser loginUser = (LoginUser)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = loginUser.getUser();
-        List<Integer> problems = getExamProblemSet( user, exam );
+        JSONArray problems = getExamProblemSet( user, exam );
         QueryWrapper wrapper = new QueryWrapper();
-        for( Integer key : problems ){
-            wrapper.or(PROBLEM.ID.eq(key));
+        for( int i=0; i<problems.size(); ++i ){
+            JSONObject obj = (JSONObject) problems.get(i);
+            Integer id = (Integer)obj.get("id");
+            wrapper.or(PROBLEM.ID.eq(id));
         }
         List<VOProblemDetail> problemDetailList = problemMapper.selectListWithRelationsByQueryAs(wrapper, VOProblemDetail.class);
         Map<Integer, VOProblemDetail> map = new HashMap<Integer, VOProblemDetail>();
         problemDetailList.forEach( item ->{map.put(item.getId(), item);} );
         List<VOProblemDetail> ret = new ArrayList<VOProblemDetail>();
-        for (Integer problem : problems) {
-            VOProblemDetail prob = map.get(problem);
+        //for (Integer problem : problems) {
+        for( int i=0; i<problems.size(); ++i ){
+            JSONObject obj = (JSONObject) problems.get(i);
+            Integer id = (Integer)obj.get("id");
+            VOProblemDetail prob = map.get(id);
             commonUtil.replaceTemplate(prob);
             ret.add(prob);
         }
@@ -144,24 +189,12 @@ public class ExamServiceImpl extends ServiceImpl<ExamMapper, Exam> implements Ex
     public Object getExamDetail(Integer id) {
         VOExamDetail exam = examMapper.selectOneWithRelationsByIdAs(id, VOExamDetail.class);
         Set<String> ids = new HashSet<String>();
-        JSONArray pArray = exam.getProblemConfig();
-        for( int i=0; i<pArray.size(); ++i ){
-            JSONObject job = pArray.getJSONObject(i);
-            int count = job.getIntValue("quantity");
-            List<String> base = job.getList("problems", String.class);
-            QueryWrapper wrapper = new QueryWrapper();
-            for( String key : base ){
-                wrapper.or( PROBLEM.ID.eq(key));
-            }
-            List<VOProblemTitle> pList = problemMapper.selectListWithRelationsByQueryAs( wrapper, VOProblemTitle.class);
-            job.put("problems", pList);
-        }
         return exam;
     }
 
     @Override
     public Object getInfo(Serializable id) {
-        return examMapper.selectOneWithRelationsByIdAs(id, VOExamBrief.class);
+        return examMapper.selectOneById(id);
     }
 
     @Override
@@ -190,6 +223,7 @@ public class ExamServiceImpl extends ServiceImpl<ExamMapper, Exam> implements Ex
             }
             //System.out.println(totalScore);
             profile.setScore(totalScore);
+            profile.setLastUpdate(calendar.getTime());
             examProfilesMapper.update(profile);
         }
         return examSubmission;

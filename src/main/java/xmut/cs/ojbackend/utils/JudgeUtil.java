@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -16,14 +17,15 @@ import org.springframework.web.client.RestTemplate;
 import xmut.cs.ojbackend.entity.*;
 import xmut.cs.ojbackend.mapper.SubmissionMapper;
 import xmut.cs.ojbackend.mapper.exam.ExamSubmissionMapper;
-import xmut.cs.ojbackend.service.*;
+import xmut.cs.ojbackend.service.OptionsSysoptionsService;
+import xmut.cs.ojbackend.service.ProblemService;
+import xmut.cs.ojbackend.service.UserService;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 
 @Component
-
 public class JudgeUtil {
 
     @Autowired
@@ -33,10 +35,7 @@ public class JudgeUtil {
     private ProblemService problemService;
 
     @Autowired
-    private UserProfileService userProfileService;
-
-    @Autowired
-    private ContestService contestService;
+    private UserService userService;
 
     @Autowired
     private SubmissionMapper submissionMapper;
@@ -47,14 +46,11 @@ public class JudgeUtil {
     @Autowired
     private CommonUtil commonUtil;
 
-    //@Autowired
-    //private SubmissionService submissionService;
-
-    @Autowired
-    private OiContestRankService oiContestRankService;
-
     @Value("${judge-server.url}")
     private String JudgeServerUrl;
+
+    @Autowired
+    RedisTemplate<Object, Object> redisTemplate;
 
     public static final int COMPILE_ERROR = -2;
 
@@ -90,12 +86,13 @@ public class JudgeUtil {
 
     public JSONObject getLanguageConfig(String language) {
         JSONArray data;
-        //if (redisUtil.hasKey("languages")) {
-        //    data = (JSONArray) redisUtil.get("languages");
-        //} else {
+        if(Boolean.TRUE.equals(redisTemplate.hasKey("languages"))){
+            data = (JSONArray) redisTemplate.opsForValue().get("languages");
+        }
+        else {
             data = (JSONArray) optionsSysoptionsService.getValue("languages");
-            //redisUtil.set("languages", data, 60 * 60);
-        //}
+            redisTemplate.opsForValue().set("languages", data );
+        }
         JSONObject languageConfig = null;
         for (Object item : data) {
             languageConfig = (JSONObject) item;
@@ -127,10 +124,10 @@ public class JudgeUtil {
         taskInfo.put("max_cpu_time", problem.getTimeLimit());
         taskInfo.put("max_memory", problem.getMemoryLimit() * 1024 * 1024);
         taskInfo.put("test_case_id", problem.getTestCaseId());
-        taskInfo.put("spj_version", problem.getSpjVersion());
+        taskInfo.put("spj_version", null);
         taskInfo.put("spj_config", null);
         taskInfo.put("spj_compile_config", null);
-        taskInfo.put("spj_src", problem.getSpjCode());
+        taskInfo.put("spj_src", null);
         taskInfo.put("output", true);
         //创建请求体
         HttpEntity<String> entity = new HttpEntity<>(taskInfo.toString(), headers);
@@ -139,14 +136,13 @@ public class JudgeUtil {
         String data = responseEntity.getBody();
         return JSON.parseObject(data);
     }
-    @Async
     public void judgeExam( ExamSubmission examSubmission, Problem problem, String judgeUrl, String token ) throws JsonProcessingException{
         //向判题服务器发送post请求
         judge(examSubmission, problem, judgeUrl, token);
         examSubmissionMapper.update(examSubmission);
         // 更新exam的状态
     }
-    @Async
+
     public void judgeNormal( Submission submission, Problem problem, String judgeUrl, String token ) throws JsonProcessingException {
         judge(submission, problem, judgeUrl, token);
         submissionMapper.update(submission);
@@ -154,10 +150,10 @@ public class JudgeUtil {
         update_userprofile(submission, problem);
     }
 
-    @Async
+    @Async("AsyncJudgeConfig")
     public void judge( Submission submission, Problem problem, String judgeUrl, String token ) throws JsonProcessingException{
         JSONObject result = getJudgeResult(problem, submission.getCode(), submission.getLanguage(), judgeUrl, token);
-        System.out.println(result);
+        //System.out.println(result);
         if (result.get("err") != null) {
             JSONObject staticInfo = new JSONObject();
             staticInfo.put("err_info", result.get("data"));
@@ -196,21 +192,19 @@ public class JudgeUtil {
         staticInfo.put("memory_cost", memoryCost);
 
         // sum up the score in OI mode
-        if (problem.getRuleType().equals("OI")) {
-            int score = 0;
-            for (int i = 0; i < testData.size(); i++) {
-                JSONObject testCase = testData.getJSONObject(i);
-                if (testCase.getIntValue("result") == ACCEPTED) {
-                    int testCaseScore = problem.getTestCaseScore().getJSONObject(i).getIntValue("score");
-                    testCase.put("score", testCaseScore);
-                    score += testCaseScore;
-                } else {
-                    testCase.put("score", 0);
-                }
-                testData.set(i, testCase);
+        int score = 0;
+        for (int i = 0; i < testData.size(); i++) {
+            JSONObject testCase = testData.getJSONObject(i);
+            if (testCase.getIntValue("result") == ACCEPTED) {
+                int testCaseScore = problem.getTestCaseScore().getJSONObject(i).getIntValue("score");
+                testCase.put("score", testCaseScore);
+                score += testCaseScore;
+            } else {
+                testCase.put("score", 0);
             }
-            staticInfo.put("score", score);
+            testData.set(i, testCase);
         }
+        staticInfo.put("score", score);
         submission.setStatisticInfo(staticInfo);
     }
 
@@ -228,68 +222,36 @@ public class JudgeUtil {
 
     private void update_userprofile(Submission submission, Problem problem) {
         // update_userprofile
-        UserProfile userProfile = userProfileService.getByUserId(submission.getUserId());
-        userProfile.setSubmissionNumber(userProfile.getSubmissionNumber() + 1);
-        JSONObject oiProblemsStatus = userProfile.getOiProblemsStatus();
+        //UserProfile userProfile = userProfileService.getByUserId(submission.getUserId());
+        User user = userService.getById(submission.getUserId());
+        //System.out.println(user.getUsername());
+        user.setSubmissionNumber(user.getSubmissionNumber() + 1);
+        JSONObject oiProblemsStatus = user.getProblemsStatus();
+        //System.out.println(user.getUsername());
         int score = submission.getStatisticInfo().getIntValue("score");
         if (!oiProblemsStatus.containsKey(String.valueOf(problem.getId()))) {
-            userProfile.addScore(score);
             oiProblemsStatus.put(String.valueOf(problem.getId()), new JSONObject());
             oiProblemsStatus.getJSONObject(String.valueOf(problem.getId())).put("status", submission.getResult());
             oiProblemsStatus.getJSONObject(String.valueOf(problem.getId())).put("displayId", problem.getDisplayId());
             oiProblemsStatus.getJSONObject(String.valueOf(problem.getId())).put("score", score);
             if (submission.getResult() == ACCEPTED) {
-                userProfile.setAcceptedNumber(userProfile.getAcceptedNumber() + 1);
+                user.setAcceptedNumber(user.getAcceptedNumber() + 1);
             }
         } else {
             if (oiProblemsStatus.getJSONObject(String.valueOf(problem.getId())).getIntValue("status") != ACCEPTED) {
-                userProfile.addScore(score, oiProblemsStatus.getJSONObject(String.valueOf(problem.getId())).getIntValue("score"));
                 oiProblemsStatus.getJSONObject(String.valueOf(problem.getId())).put("score", score);
                 oiProblemsStatus.getJSONObject(String.valueOf(problem.getId())).put("status", submission.getResult());
                 if (submission.getResult() == ACCEPTED) {
-                    userProfile.setAcceptedNumber(userProfile.getAcceptedNumber() + 1);
+                    user.setAcceptedNumber(user.getAcceptedNumber() + 1);
                 }
             }
         }
-        userProfile.setOiProblemsStatus(oiProblemsStatus);
-        userProfileService.updateById(userProfile);
+        user.setProblemsStatus(oiProblemsStatus);
+        userService.updateById(user);
     }
 
     //        if self.contest.rule_type == ContestRuleType.OI or self.contest.real_time_rank:
 //            cache.delete(f"{CacheKey.contest_rank_cache}:{self.contest.id}")
-    private void update_contest_rank(Submission submission, Problem problem, Contest contest) {
-        //if (contest.getRuleType().equals("OI") || contest.getRealTimeRank()) {
-        //    redisUtil.del("contest_rank_cache:" + contest.getId());
-        //}
-        OiContestRank oiContestRank = oiContestRankService.getByUserIdAndContestId(submission.getUserId(), contest.getId());
-        if (oiContestRank == null) {
-            oiContestRank = new OiContestRank(contest.getId(), submission.getUserId());
-            oiContestRankService.save(oiContestRank);
-        }
-        update_oi_contest_rank(submission, problem, contest, oiContestRank);
-    }
-
     private void update_exam_info(ExamSubmission examSubmission, Problem problem, Exam exam) {
     }
-
-    private void update_oi_contest_rank(Submission submission, Problem problem, Contest contest, OiContestRank oiContestRank) {
-        String problemId = String.valueOf(submission.getProblemId());
-        int currentScore = submission.getStatisticInfo().getIntValue("score");
-        JSONObject info = oiContestRank.getSubmissionInfo();
-        if (currentScore < info.getIntValue(problemId)) {
-            return;
-        }
-        System.out.println(oiContestRank.getSubmissionInfo());
-        Integer lastScore = oiContestRank.getSubmissionInfo().getInteger(problemId);
-        if (lastScore != null) {
-            oiContestRank.setTotalScore(oiContestRank.getTotalScore() - lastScore + currentScore);
-        } else {
-            oiContestRank.setTotalScore(oiContestRank.getTotalScore() + currentScore);
-        }
-        oiContestRank.setSubmissionNumber(oiContestRank.getSubmissionNumber() + 1);
-        oiContestRank.getSubmissionInfo().put(problemId, currentScore);
-        oiContestRankService.saveOrUpdate(oiContestRank);
-    }
-
-
 }

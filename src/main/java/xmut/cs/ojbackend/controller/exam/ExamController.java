@@ -69,4 +69,9 @@ public class ExamController {
         User user = loginUser.getUser();
         return Result.success(examService.getExamProfile( user.getId(), examId));
     }
+
+    @GetMapping("rank")
+    public Result getExamRank( Integer examId ){
+        return Result.success(examService.getExamRank(examId));
+    }
 }

@@ -5,13 +5,12 @@ import java.util.List;
 import javax.annotation.processing.Generated;
 import org.springframework.stereotype.Component;
 import xmut.cs.ojbackend.entity.Problem;
-import xmut.cs.ojbackend.entity.ProblemTag;
 import xmut.cs.ojbackend.entity.VO.VOProblemTitle;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2024-06-20T07:13:51+0000",
-    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.11 (Ubuntu)"
+    date = "2024-08-02T09:43:42+0000",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.12 (Ubuntu)"
 )
 @Component
 public class VoProblemTitleWrapperImpl implements VoProblemTitleWrapper {
@@ -34,17 +33,14 @@ public class VoProblemTitleWrapperImpl implements VoProblemTitleWrapper {
         problem.submissionNumber( vo.getSubmissionNumber() );
         problem.acceptedNumber( vo.getAcceptedNumber() );
         problem.displayId( vo.getDisplayId() );
-        problem.contestId( vo.getContestId() );
-        List<ProblemTag> list1 = vo.getTags();
-        if ( list1 != null ) {
-            problem.tags( new ArrayList<ProblemTag>( list1 ) );
-        }
+        problem.majorTagId( vo.getMajorTagId() );
+        problem.subTagId( vo.getSubTagId() );
 
         return problem.build();
     }
 
     @Override
-    public VOProblemTitle toVo(Problem entity) {
+    public VOProblemTitle toO(Problem entity) {
         if ( entity == null ) {
             return null;
         }
@@ -61,11 +57,8 @@ public class VoProblemTitleWrapperImpl implements VoProblemTitleWrapper {
         vOProblemTitle.submissionNumber( entity.getSubmissionNumber() );
         vOProblemTitle.acceptedNumber( entity.getAcceptedNumber() );
         vOProblemTitle.displayId( entity.getDisplayId() );
-        vOProblemTitle.contestId( entity.getContestId() );
-        List<ProblemTag> list1 = entity.getTags();
-        if ( list1 != null ) {
-            vOProblemTitle.tags( new ArrayList<ProblemTag>( list1 ) );
-        }
+        vOProblemTitle.majorTagId( entity.getMajorTagId() );
+        vOProblemTitle.subTagId( entity.getSubTagId() );
 
         return vOProblemTitle.build();
     }
@@ -92,7 +85,7 @@ public class VoProblemTitleWrapperImpl implements VoProblemTitleWrapper {
 
         List<VOProblemTitle> list = new ArrayList<VOProblemTitle>( entityList.size() );
         for ( Problem problem : entityList ) {
-            list.add( toVo( problem ) );
+            list.add( toO( problem ) );
         }
 
         return list;

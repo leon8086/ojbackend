@@ -24,6 +24,8 @@ public class VOExamBriefTableDef extends TableDef {
 
     public final QueryColumn DESCRIPTION = new QueryColumn(this, "description");
 
+    public final QueryColumn PROBLEM_COUNT = new QueryColumn(this, "problem_count");
+
     /**
      * 所有字段。
      */
@@ -32,7 +34,7 @@ public class VOExamBriefTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, TITLE, END_TIME, START_TIME, DESCRIPTION};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, TITLE, END_TIME, START_TIME, DESCRIPTION, PROBLEM_COUNT};
 
     public VOExamBriefTableDef() {
         super("", "exam");

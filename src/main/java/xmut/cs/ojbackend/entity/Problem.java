@@ -2,23 +2,21 @@ package xmut.cs.ojbackend.entity;
 
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
-import com.mybatisflex.annotation.*;
-
-import java.io.Serializable;
-import java.util.List;
-
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.KeyType;
+import com.mybatisflex.annotation.Table;
 import com.mybatisflex.core.handler.Fastjson2TypeHandler;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- *  实体类。
- *
- * @author leon
- * @since 2024-06-03
- */
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -26,6 +24,7 @@ import lombok.NoArgsConstructor;
 @Table(value = "problem")
 public class Problem implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Id(keyType = KeyType.Auto)
@@ -55,24 +54,13 @@ public class Problem implements Serializable {
     @Column(onInsertValue = "'{}'", typeHandler = Fastjson2TypeHandler.class)
     private JSONObject template;
 
-    @Column(onInsertValue = "to_char(now(), 'YYYY-MM-DD HH24:MI:SS')")
-    private String createTime;
+    private Date createTime;
 
-    private String lastUpdateTime;
+    private Date lastUpdateTime;
 
     private Integer timeLimit;
 
     private Integer memoryLimit;
-
-    private Boolean spj;
-
-    private String spjLanguage;
-
-    private String spjCode;
-
-    private String spjVersion;
-
-    private String ruleType;
 
     private Boolean visible;
 
@@ -88,7 +76,6 @@ public class Problem implements Serializable {
 
     private Integer createdById;
 
-    @Column(value = "_id")
     private String displayId;
 
     @Column(onInsertValue = "'{}'", typeHandler = Fastjson2TypeHandler.class)
@@ -96,23 +83,9 @@ public class Problem implements Serializable {
 
     private Integer totalScore;
 
-    private Integer contestId;
+    @Column(onInsertValue = "null")
+    private Integer majorTagId;
 
-    private Boolean isPublic;
-
-    private Boolean spjCompileOk;
-
-    @Column(typeHandler = Fastjson2TypeHandler.class)
-    private JSONObject ioMode;
-
-    private Boolean shareSubmission;
-
-    @RelationManyToMany(
-            joinTable = "problem_tags",
-            selfField = "id",
-            joinSelfColumn="problem_id",
-            targetField = "id",
-            joinTargetColumn="problemtag_id"
-    )
-    private List<ProblemTag> tags;
+    @Column(onInsertValue = "null")
+    private Integer subTagId;
 }

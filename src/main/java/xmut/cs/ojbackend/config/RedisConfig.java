@@ -1,6 +1,5 @@
 package xmut.cs.ojbackend.config;
 
-import com.alibaba.fastjson.support.spring.FastJsonRedisSerializer;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
@@ -25,7 +24,7 @@ public class RedisConfig {
         RedisTemplate<Object, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
 
-        FastJsonRedisSerializer serializer = new FastJsonRedisSerializer(Object.class);
+        FastJson2RedisSerializer serializer = new FastJson2RedisSerializer(Object.class);
 
         // 使用StringRedisSerializer来序列化和反序列化redis的key值
         template.setKeySerializer(new StringRedisSerializer());

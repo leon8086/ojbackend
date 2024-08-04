@@ -1,14 +1,11 @@
 package xmut.cs.ojbackend.entity.VO;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.mybatisflex.annotation.*;
 import com.mybatisflex.core.handler.Fastjson2TypeHandler;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import xmut.cs.ojbackend.entity.ProblemTag;
 
 import java.io.Serializable;
 import java.util.List;
@@ -35,17 +32,17 @@ public class VOProblemTitle implements Serializable {
     @Column(onInsertValue = "0")
     private Long acceptedNumber;
 
-    @Column(value = "_id")
     private String displayId;
 
-    private Integer contestId;
+    @Column(onInsertValue = "null")
+    private Integer majorTagId;
 
-    @RelationManyToMany(
-            joinTable = "problem_tags",
-            selfField = "id",
-            joinSelfColumn="problem_id",
-            targetField = "id",
-            joinTargetColumn="problemtag_id"
-    )
-    private List<ProblemTag> tags;
+    @Column(onInsertValue = "null")
+    private Integer subTagId;
+
+    @RelationOneToOne(selfField = "majorTagId", targetTable="problem_tag", targetField="id", valueField = "name")
+    private String majorTag;
+
+    @RelationOneToOne(selfField = "subTagId", targetTable="problem_tag", targetField="id", valueField = "name")
+    private String subTag;
 }

@@ -1,13 +1,11 @@
 package xmut.cs.ojbackend.entity.entitymapper;
 
-import com.mybatisflex.core.paginate.Page;
-
 import java.util.List;
 
-public interface BaseWrapper<Vo, E> {
-    E toEntity(Vo vo);
-    Vo toVo(E entity);
+public interface BaseWrapper<O, E> {
+    E toEntity(O vo);
+    O toO(E entity);
 
-    List<E> toEntity(List<Vo> voList);
-    List<Vo> toVo(List<E> entityList);
+    List<E> toEntity(List<O> voList);
+    List<O> toVo(List<E> entityList);
 }

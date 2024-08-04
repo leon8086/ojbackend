@@ -3,16 +3,15 @@ package xmut.cs.ojbackend.entity.VO;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.mybatisflex.annotation.*;
-
-import java.io.Serializable;
-import java.util.List;
-
 import com.mybatisflex.core.handler.Fastjson2TypeHandler;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import xmut.cs.ojbackend.entity.ProblemTag;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.List;
 
 /**
  *  实体类。
@@ -27,6 +26,7 @@ import xmut.cs.ojbackend.entity.ProblemTag;
 @Table(value = "problem")
 public class VOProblemDetail implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Id(keyType = KeyType.Auto)
@@ -63,8 +63,9 @@ public class VOProblemDetail implements Serializable {
     @Column(onInsertValue = "0")
     private Long acceptedNumber;
 
-    @Column(value = "_id")
     private String displayId;
+
+    private Boolean visible;
 
     @Column(onInsertValue = "'{}'", typeHandler = Fastjson2TypeHandler.class)
     private JSONObject statisticInfo;
@@ -73,17 +74,15 @@ public class VOProblemDetail implements Serializable {
 
     private Boolean isPublic;
 
-    @Column(typeHandler = Fastjson2TypeHandler.class)
-    private JSONObject ioMode;
+    @Column(onInsertValue = "null")
+    private Integer majorTagId;
 
-    private Boolean shareSubmission;
+    @Column(onInsertValue = "null")
+    private Integer subTagId;
 
-    @RelationManyToMany(
-            joinTable = "problem_tags",
-            selfField = "id",
-            joinSelfColumn="problem_id",
-            targetField = "id",
-            joinTargetColumn="problemtag_id"
-    )
-    private List<ProblemTag> tags;
+    @RelationOneToOne(selfField = "majorTagId", targetTable="problem_tag", targetField="id", valueField = "name")
+    private String majorTag;
+
+    @RelationOneToOne(selfField = "subTagId", targetTable="problem_tag", targetField="id", valueField = "name")
+    private String subTag;
 }

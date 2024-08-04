@@ -2,7 +2,11 @@ package xmut.cs.ojbackend.service;
 
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.service.IService;
+import xmut.cs.ojbackend.entity.DTO.DTOUserAdminUpdate;
+import xmut.cs.ojbackend.entity.DTO.DTOUserImport;
 import xmut.cs.ojbackend.entity.User;
+
+import java.util.List;
 
 /**
  *  服务层。
@@ -29,4 +33,14 @@ public interface UserService extends IService<User> {
     Object login(User user);
 
     Object logout();
+
+    Object check( String token );
+
+    Object listPage(Integer page, Integer limit, String keyword, String userType);
+
+    Object importUsers(List<DTOUserImport> userList);
+
+    Object listAdmin();
+
+    Object adminUpdate(DTOUserAdminUpdate userUpdate);
 }

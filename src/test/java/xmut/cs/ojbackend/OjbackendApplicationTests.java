@@ -1,20 +1,19 @@
 package xmut.cs.ojbackend;
 
-import com.alibaba.fastjson.JSONObject;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.alibaba.fastjson2.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import xmut.cs.ojbackend.entity.Exam;
-import xmut.cs.ojbackend.entity.Submission;
 import xmut.cs.ojbackend.entity.User;
 import xmut.cs.ojbackend.service.ProblemService;
 import xmut.cs.ojbackend.service.SubmissionService;
 import xmut.cs.ojbackend.service.UserService;
 import xmut.cs.ojbackend.service.exam.ExamService;
 import xmut.cs.ojbackend.utils.JwtUtil;
+import xmut.cs.ojbackend.utils.Pkdf2Encoder;
 
 @SpringBootTest
 class OjbackendApplicationTests {
@@ -41,39 +40,6 @@ class OjbackendApplicationTests {
     void contextLoads() {
         System.out.println(problemService
                 .listPage(1,10,"", "", ""));
-    }
-
-    @Test
-    void testSubmitCode() throws JsonProcessingException {
-        Submission submission = new Submission();
-        submission.setProblemId(21);
-        String code = """
-                #include <iostream>
-                using namespace std;
-                int main() {
-                  int a, b;
-                  cin >> a >> b;
-                  cout << a + b << endl;
-                  return 0;
-                }
-                """;
-        submission.setCode(code);
-        submission.setLanguage("C++");
-        submissionService.submitCode(submission, "127.0.0.1", 1);
-    }
-
-    @Test
-    void testApplyTemplate() throws JsonProcessingException {
-        Submission submission = new Submission();
-        submission.setProblemId(22);
-        String code = """
-                int add_func( int a, int b ){
-                    return a+b;
-                }
-                """;
-        submission.setCode(code);
-        submission.setLanguage("C");
-        submissionService.submitCode(submission, "127.0.0.1", 1);
     }
 
     @Test
@@ -129,5 +95,16 @@ class OjbackendApplicationTests {
     @Test
     void testExamDetail(){
         System.out.println(examService.getExamDetail(12));
+    }
+
+    @Test
+    void testExamRank(){
+        System.out.println(examService.getExamRank(12));
+    }
+
+    @Test
+    void testPassword(){
+        Pkdf2Encoder encoder = new Pkdf2Encoder();
+        System.out.println( encoder.encode("1"));
     }
 }

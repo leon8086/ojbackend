@@ -18,6 +18,10 @@ public class ProblemTagTableDef extends TableDef {
 
     public final QueryColumn NAME = new QueryColumn(this, "name");
 
+    public final QueryColumn ORDER = new QueryColumn(this, "order");
+
+    public final QueryColumn PARENT_TAG = new QueryColumn(this, "parent_tag");
+
     /**
      * 所有字段。
      */
@@ -26,7 +30,7 @@ public class ProblemTagTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, NAME};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, NAME, ORDER, PARENT_TAG};
 
     public ProblemTagTableDef() {
         super("", "problem_tag");

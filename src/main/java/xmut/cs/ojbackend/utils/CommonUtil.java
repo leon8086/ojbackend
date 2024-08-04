@@ -2,7 +2,10 @@ package xmut.cs.ojbackend.utils;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import xmut.cs.ojbackend.entity.LoginUser;
+import xmut.cs.ojbackend.entity.User;
 import xmut.cs.ojbackend.entity.VO.VOProblemDetail;
 
 import java.util.HashMap;
@@ -38,5 +41,10 @@ public class CommonUtil {
             JSONObject obj = JSON.parseObject(JSON.toJSONString(template));
             problem.setTemplate(obj);
         }
+    }
+
+    public User getCurrentUser(){
+        LoginUser loginUser = (LoginUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return loginUser.getUser();
     }
 }
