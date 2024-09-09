@@ -2,6 +2,7 @@ package xmut.cs.ojbackend.service;
 
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.service.IService;
+import xmut.cs.ojbackend.base.Result;
 import xmut.cs.ojbackend.entity.DTO.DTOUserAdminUpdate;
 import xmut.cs.ojbackend.entity.DTO.DTOUserImport;
 import xmut.cs.ojbackend.entity.User;
@@ -38,9 +39,31 @@ public interface UserService extends IService<User> {
 
     Object listPage(Integer page, Integer limit, String keyword, String userType);
 
+    Integer fetchGradeId(String gradeName);
+
     Object importUsers(List<DTOUserImport> userList);
 
     Object listAdmin();
 
     Object adminUpdate(DTOUserAdminUpdate userUpdate);
+
+    Object getProblemStatus();
+
+    Object userRank(Integer page, Integer limit, Integer grade);
+
+    Object userRankMajorTag( Integer page, Integer limit, Integer grade, Integer tag );
+
+    Result resetPassword(User user, String original, String newPassword);
+
+    Object getUserStatus();
+
+    Object adminGetUserStatus(Integer id);
+
+    Object adminResetUserPSW(Integer id);
+
+    Object adminNewUser( User user );
+
+    public Object listGetCourseAddStudent(String keyword, Integer courseId);
+
+    Object listNoAdmin();
 }

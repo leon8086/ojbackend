@@ -3,6 +3,7 @@ package xmut.cs.ojbackend.entity.VO;
 
 import com.mybatisflex.annotation.Id;
 import com.mybatisflex.annotation.KeyType;
+import com.mybatisflex.annotation.RelationOneToOne;
 import com.mybatisflex.annotation.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -39,6 +40,13 @@ public class VOExamBrief implements Serializable {
     private Date startTime;
 
     private Date endTime;
+
+    private Integer courseId;
+
+    @RelationOneToOne( selfField = "courseId", targetTable = "course", targetField = "id", valueField = "courseName")
+    private String course;
+
+    private Boolean isEnded;
 
     private Integer problemCount;
 }

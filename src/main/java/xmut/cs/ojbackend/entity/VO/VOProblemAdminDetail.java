@@ -50,7 +50,7 @@ public class VOProblemAdminDetail implements Serializable {
     @Column(typeHandler = Fastjson2TypeHandler.class)
     private List<String> languages;
 
-    @Column(onInsertValue = "'{}'", typeHandler = Fastjson2TypeHandler.class)
+    @Column(typeHandler = Fastjson2TypeHandler.class)
     private JSONObject template;
 
     private Integer timeLimit;

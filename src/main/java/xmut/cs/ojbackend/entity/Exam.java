@@ -49,6 +49,7 @@ public class Exam implements Serializable {
 
     private Boolean visible;
 
+    @Column(value="course_id")
     private Integer courseId;
 
     @Column(typeHandler = Fastjson2TypeHandler.class)
@@ -56,4 +57,9 @@ public class Exam implements Serializable {
 
     @Column(typeHandler = Fastjson2TypeHandler.class)
     private JSONArray problemConfig;
+
+    @Column( onInsertValue = "false")
+    private Boolean isEnded;
+
+    private Integer problemCount;
 }

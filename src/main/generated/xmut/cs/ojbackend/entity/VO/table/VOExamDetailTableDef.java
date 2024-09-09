@@ -18,13 +18,21 @@ public class VOExamDetailTableDef extends TableDef {
 
     public final QueryColumn TITLE = new QueryColumn(this, "title");
 
+    public final QueryColumn COURSE = new QueryColumn(this, "course");
+
     public final QueryColumn END_TIME = new QueryColumn(this, "end_time");
+
+    public final QueryColumn IS_ENDED = new QueryColumn(this, "is_ended");
+
+    public final QueryColumn COURSE_ID = new QueryColumn(this, "course_id");
 
     public final QueryColumn START_TIME = new QueryColumn(this, "start_time");
 
     public final QueryColumn CREATED_BY_ID = new QueryColumn(this, "created_by_id");
 
     public final QueryColumn DESCRIPTION = new QueryColumn(this, "description");
+
+    public final QueryColumn PROBLEM_COUNT = new QueryColumn(this, "problem_count");
 
     public final QueryColumn PROBLEM_CONFIG = new QueryColumn(this, "problem_config");
 
@@ -38,7 +46,7 @@ public class VOExamDetailTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, TITLE, END_TIME, START_TIME, CREATED_BY_ID, DESCRIPTION, PROBLEM_CONFIG, ALLOWED_IP_RANGES};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, TITLE, COURSE, END_TIME, IS_ENDED, COURSE_ID, START_TIME, CREATED_BY_ID, DESCRIPTION, PROBLEM_COUNT, PROBLEM_CONFIG, ALLOWED_IP_RANGES};
 
     public VOExamDetailTableDef() {
         super("", "exam");

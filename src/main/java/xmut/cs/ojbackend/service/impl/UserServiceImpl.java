@@ -14,10 +14,14 @@ import org.springframework.stereotype.Service;
 import xmut.cs.ojbackend.base.Result;
 import xmut.cs.ojbackend.entity.DTO.DTOUserAdminUpdate;
 import xmut.cs.ojbackend.entity.DTO.DTOUserImport;
+import xmut.cs.ojbackend.entity.Grade;
 import xmut.cs.ojbackend.entity.LoginUser;
+import xmut.cs.ojbackend.entity.ProblemTag;
 import xmut.cs.ojbackend.entity.User;
-import xmut.cs.ojbackend.entity.VO.VOUserBrief;
-import xmut.cs.ojbackend.entity.VO.VOUserLogin;
+import xmut.cs.ojbackend.entity.VO.*;
+import xmut.cs.ojbackend.entity.entitymapper.VoUserLoginWrapper;
+import xmut.cs.ojbackend.mapper.GradeMapper;
+import xmut.cs.ojbackend.mapper.ProblemTagMapper;
 import xmut.cs.ojbackend.mapper.UserMapper;
 import xmut.cs.ojbackend.service.UserService;
 import xmut.cs.ojbackend.utils.CommonUtil;
@@ -27,6 +31,9 @@ import xmut.cs.ojbackend.utils.Pkdf2Encoder;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import static xmut.cs.ojbackend.entity.table.CourseUserTableDef.COURSE_USER;
+import static xmut.cs.ojbackend.entity.table.GradeTableDef.GRADE;
+import static xmut.cs.ojbackend.entity.table.ScoreTableDef.SCORE;
 import static xmut.cs.ojbackend.entity.table.UserTableDef.USER;
 /**
  *  服务层实现。
@@ -47,7 +54,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     RedisTemplate<Object, Object> redisTemplate;
 
     @Autowired
+    GradeMapper gradeMapper;
+
+    @Autowired
     CommonUtil commonUtil;
+
+    @Autowired
+    VoUserLoginWrapper voUserLoginWrapper;
+
+    @Autowired
+    private ProblemTagMapper problemTagMapper;
 
     public User getByUsernameWithoutPassword(String username) {
         QueryWrapper queryWrapper = new QueryWrapper();
@@ -103,18 +119,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         Authentication authentication;
         try {
             authentication = authenticationManager.authenticate(authenticationToken);
-        }
-        catch( Exception e ){
+        } catch (Exception e) {
             return Result.loginFailed();
         }
-        LoginUser loginUser = (LoginUser)authentication.getPrincipal();
+        LoginUser loginUser = (LoginUser) authentication.getPrincipal();
+        User updateUser = UpdateEntity.of(User.class, loginUser.getUser().getId());
+        updateUser.setLastLogin(Calendar.getInstance().getTime());
+        mapper.update(updateUser);
         User redisUser = this.mapper.selectOneWithRelationsById(loginUser.getUser().getId());
-        String key = "user-id:"+redisUser.getId().toString();
+        String key = "user-id:" + redisUser.getId().toString();
         // 超时时间1天
-        redisTemplate.opsForValue().set(key, redisUser, 1, TimeUnit.DAYS);
+        redisTemplate.opsForValue().set(key, redisUser, 7, TimeUnit.DAYS);
         String jwt = JwtUtil.generateToken(loginUser.getUser());
         VOUserLogin userRet = new VOUserLogin();
         userRet.setId(loginUser.getUser().getId());
+        userRet.setFirstLogin(loginUser.getUser().getFirstLogin());
         userRet.setUsername(loginUser.getUser().getUsername());
         userRet.setAdminType(loginUser.getUser().getAdminType());
         userRet.setIsDisabled(loginUser.getUser().getIsDisabled());
@@ -127,24 +146,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         LoginUser loginUser = (LoginUser) authentication.getPrincipal();
         Integer userid = loginUser.getUser().getId();
-        redisTemplate.delete("user-id:"+userid);
+        redisTemplate.delete("user-id:" + userid);
         return Result.success(0);
     }
 
-    public VOUserLogin getLogedUser( String token ){
-        VOUserLogin userRet = new VOUserLogin();
-        LoginUser loginUser = (LoginUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        userRet.setId(loginUser.getUser().getId());
-        userRet.setUsername(loginUser.getUser().getUsername());
-        userRet.setAdminType(loginUser.getUser().getAdminType());
-        userRet.setIsDisabled(loginUser.getUser().getIsDisabled());
-        userRet.setToken(token);
-        return userRet;
-    }
-
     @Override
-    public Object check( String token ) {
-        return getLogedUser(token);
+    public Object check(String token) {
+        User user = commonUtil.getCurrentUser();
+        VOUserLogin ret = voUserLoginWrapper.toO(user);
+        return ret;
     }
 
     @Override
@@ -156,14 +166,48 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             limit = 1000;
         }
         QueryWrapper wrapper = new QueryWrapper();
-        if( keyword != null && !keyword.isEmpty() ){
+        if (keyword != null && !keyword.isEmpty()) {
             wrapper.where(USER.USERNAME.like(keyword));
         }
-        if( userType != null && !userType.isEmpty()){
+        if (userType != null && !userType.isEmpty()) {
             wrapper.where(USER.ADMIN_TYPE.eq(userType));
         }
         wrapper.orderBy(USER.ID.asc());
-        return userMapper.paginateWithRelationsAs(page, limit, wrapper, User.class);
+        return userMapper.paginateWithRelationsAs(page, limit, wrapper, VOUserAdminList.class);
+    }
+
+    @Override
+    public Object listGetCourseAddStudent( String keyword, Integer courseId) {
+        QueryWrapper wrapper = new QueryWrapper();
+        wrapper.from( USER.as("u"), COURSE_USER.as("cu"));
+        wrapper.where(USER.ID.eq(COURSE_USER.USER_ID));
+        wrapper.where(COURSE_USER.COURSE_ID.ne(courseId));
+        if (keyword != null && !keyword.isEmpty()) {
+            wrapper.where(USER.USERNAME.like(keyword));
+        }
+        wrapper.where(USER.ADMIN_TYPE.eq(User.ADMINTYPE_REGULAR));
+        wrapper.orderBy(USER.ID.asc());
+        return userMapper.selectListWithRelationsByQueryAs(wrapper, VOUserAdminList.class);
+    }
+
+    @Override
+    public Object listNoAdmin() {
+        QueryWrapper wrapper = new QueryWrapper();
+        wrapper.where(USER.ADMIN_TYPE.eq(User.ADMINTYPE_REGULAR));
+        return userMapper.selectListWithRelationsByQueryAs(wrapper, VOUserAdminList.class);
+    }
+
+    @Override
+    public Integer fetchGradeId(String gradeName) {
+        QueryWrapper wrapper = new QueryWrapper();
+        wrapper.where(GRADE.NAME.eq(gradeName));
+        Grade grade = gradeMapper.selectOneByQuery(wrapper);
+        if (grade == null) {
+            grade = new Grade();
+            grade.setName(gradeName);
+            gradeMapper.insert(grade);
+        }
+        return grade.getId();
     }
 
     @Override
@@ -171,23 +215,27 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         Pkdf2Encoder encoder = new Pkdf2Encoder();
         List<VOUserLogin> failed = new ArrayList<VOUserLogin>();
         int count = 0;
-        for( DTOUserImport u : userList ){
+        for (DTOUserImport u : userList) {
             User user = new User();
-            user.setPassword( encoder.encode(u.getPassword()));
-            user.setUsername( u.getUsername() );
-            user.setEmail( u.getEmail() );
+            user.setPassword(encoder.encode(u.getPassword()));
+            user.setUsername(u.getUsername());
+            user.setEmail(u.getEmail());
             user.setCreateTime(Calendar.getInstance().getTime());
-            user.setAdminType( u.getAdminType());
             user.setIsDisabled(false);
-            user.setGrade(u.getGrade());
+            user.setGrade(fetchGradeId(u.getGrade()));
+            if( user.getGrade() == 1 ){ // 管理员
+                user.setAdminType(User.ADMINTYPE_ADMIN);
+            }
+            else{
+                user.setAdminType(User.ADMINTYPE_REGULAR);
+            }
             user.setRealName(u.getRealName());
             user.setFirstLogin(true);
             try {
                 getMapper().insert(user);
-                count ++;
-            }
-            catch(Exception e){
-                if( failed.size() < 10){
+                count++;
+            } catch (Exception e) {
+                if (failed.size() < 10) {
                     VOUserLogin ur = new VOUserLogin();
                     ur.setUsername(u.getUsername());
                     ur.setRealName(e.getClass().toString());
@@ -197,7 +245,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             }
         }
         Map<String, Object> ret = new HashMap<>();
-        ret.put( "insert", count );
+        ret.put("insert", count);
         ret.put("failed", failed);
         return ret;
     }
@@ -206,14 +254,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public Object listAdmin() {
         QueryWrapper wrapper = new QueryWrapper();
         wrapper.where(USER.ADMIN_TYPE.le(2));
-        wrapper.and( USER.IS_DISABLED.eq(false));
-        return userMapper.selectListByQueryAs( wrapper, VOUserBrief.class);
+        wrapper.and(USER.IS_DISABLED.eq(false));
+        return userMapper.selectListByQueryAs(wrapper, VOUserBrief.class);
     }
 
     @Override
     public Object adminUpdate(DTOUserAdminUpdate userUpdate) {
         User user = UpdateEntity.of(User.class, userUpdate.getId());
-        if( userUpdate.getPassword() != null){
+        if (userUpdate.getPassword() != null) {
             Pkdf2Encoder encoder = new Pkdf2Encoder();
             user.setPassword(encoder.encode(userUpdate.getPassword()));
         }
@@ -222,8 +270,110 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setRealName(userUpdate.getRealName());
         user.setEmail(userUpdate.getEmail());
         user.setGrade(userUpdate.getGrade());
-        String key = "user-id:"+user.getId().toString();
+        String key = "user-id:" + user.getId().toString();
         redisTemplate.delete(key); // 删除redis-key，保证数据一致性。
         return getMapper().update(user);
+    }
+
+    @Override
+    public Object getProblemStatus() {
+        User user = commonUtil.getCurrentUser();
+        return user.getProblemsStatus();
+    }
+
+    @Override
+    public Object userRank(Integer page, Integer limit, Integer grade) {
+        if (page == null) {
+            page = 1;
+        }
+        if (limit == null) {
+            limit = 1000;
+        }
+        QueryWrapper wrapper = new QueryWrapper();
+        wrapper.where(USER.ADMIN_TYPE.eq(User.ADMINTYPE_REGULAR));
+        if (grade != null && grade != 0 && grade != 1) {
+            wrapper.and(USER.GRADE.eq(grade));
+        }
+        wrapper.orderBy(USER.ACCEPTED_NUMBER.desc(), USER.LAST_ACCEPT.asc(), USER.SUBMISSION_NUMBER.asc());
+        Page<VOUserRank> ret = mapper.paginateWithRelationsAs( page, limit, wrapper, VOUserRank.class);
+        for( VOUserRank u: ret.getRecords()){
+            u.setScore(u.getAcceptedNumber());
+        }
+        return ret;
+    }
+
+    @Override
+    public Object userRankMajorTag(Integer page, Integer limit, Integer grade, Integer tag){
+        if (page == null) {
+            page = 1;
+        }
+        if (limit == null) {
+            limit = 1000;
+        }
+        ProblemTag tagObj = problemTagMapper.selectOneById(tag);
+        QueryWrapper wrapper = new QueryWrapper();
+        wrapper.select(USER.ALL_COLUMNS,SCORE.SCORE_.as("score"));
+        wrapper.from(USER.as("u"), SCORE.as("s"));
+        wrapper.where(USER.ADMIN_TYPE.eq(User.ADMINTYPE_REGULAR));
+        wrapper.and( USER.ID.eq(SCORE.USER_ID));
+        wrapper.and(SCORE.MAJOR_TAG.eq(tag));
+        if (grade != null && grade != 0 && grade != 1) {
+            wrapper.and(USER.GRADE.eq(grade));
+        }
+        Page<VOUserRankTag> ret = mapper.paginateWithRelationsAs(page, limit, wrapper, VOUserRankTag.class);
+        for( VOUserRankTag u : ret.getRecords() ){
+            u.setMajorTagName(tagObj.getName());
+        }
+        return ret;
+    }
+
+    @Override
+    public Result resetPassword(User user, String original, String newPassword) {
+        Pkdf2Encoder encoder = new Pkdf2Encoder();
+        if( !encoder.checkPassword(original, user.getPassword())){
+            return Result.error(Result.WRONG_PARAMS, "密码输入错误");
+        }
+        User uu = UpdateEntity.of(User.class, user.getId());
+        uu.setFirstLogin(false);
+        uu.setPassword(encoder.encode(newPassword));
+        mapper.update(uu);
+        // 删除掉对象，要求重新登录
+        redisTemplate.delete("user-id:" + user.getId());
+        return Result.success("修改成功");
+    }
+
+    @Override
+    public Object getUserStatus() {
+        User user = commonUtil.getCurrentUser();
+        return user.getProblemsStatus();
+    }
+
+    @Override
+    public Object adminGetUserStatus(Integer id) {
+        User user = this.getById(id);
+        return user;
+    }
+
+    @Override
+    public Object adminResetUserPSW(Integer id) {
+        Pkdf2Encoder encoder = new Pkdf2Encoder();
+        User uu = UpdateEntity.of(User.class, id);
+        uu.setFirstLogin(true);
+        uu.setPassword(encoder.encode("123456"));
+        mapper.update(uu);
+        // 删除掉对象，要求重新登录
+        redisTemplate.delete("user-id:" + id);
+        return "修改成功";
+    }
+
+    @Override
+    public Object adminNewUser( User user ){
+        Pkdf2Encoder encoder = new Pkdf2Encoder();
+        user.setPassword(encoder.encode("123456"));
+        user.setCreateTime(Calendar.getInstance().getTime());
+        user.setIsDisabled(false);
+        user.setFirstLogin(true);
+        mapper.insert( user );
+        return user;
     }
 }

@@ -33,6 +33,7 @@ public class VOCourseList implements Serializable {
 
     private Integer ownerId;
 
+    @Column(ignore = true)
     @RelationOneToOne(selfField = "ownerId", targetField = "id", targetTable = "user", valueField="username")
     private String owner;
 

@@ -34,14 +34,20 @@ public class ProblemController {
     }
 
     @GetMapping("list")
-    public Object list( Integer page, Integer limit, String keyword, String difficulty, String tag ){
-        Object ret = Result.success(problemService.listPage(page, limit, keyword, difficulty, tag ));
+    public Object list( Integer page, Integer limit, String keyword, String difficulty, Integer[] tags ){
+        Object ret = Result.success(problemService.listPage(page, limit, keyword, difficulty, tags ));
         return ret;
     }
 
     @GetMapping("detail")
     public Object getInfo(Integer id) {
         Object ret = problemService.info(id);
+        return Result.success(ret);
+    }
+
+    @GetMapping("brief-all")
+    public Result getAllBrief(){
+        Object ret = problemService.getAllBrief();
         return Result.success(ret);
     }
 }

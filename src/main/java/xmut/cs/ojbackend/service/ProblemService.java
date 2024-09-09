@@ -16,15 +16,13 @@ import java.util.List;
  * @since 2024-06-03
  */
 public interface ProblemService extends IService<Problem> {
-    public Object listPage(Integer page, Integer limit, String keyword, String difficulty, String tag);
+    public Object listPage(Integer page, Integer limit, String keyword, String difficulty, Integer[] tags);
 
     public Object info( Integer id );
 
-    //Object listBriefPage(Integer page, Integer limit, String keyword, String difficulty);
-
     Object adminListPage(Integer page, Integer limit, String keyword);
 
-    Object adminSetVisibility(Integer id, Boolean visible);
+    Object adminSetVisibility(List<Integer> id, Boolean visible);
 
     Object importProblem(MultipartFile file) throws IOException, NoSuchAlgorithmException;
 
@@ -41,4 +39,8 @@ public interface ProblemService extends IService<Problem> {
     Object adminUpdateProblem(Problem problem) throws IOException;
 
     Object adminUpdateProblemWithCases(Problem problem, MultipartFile multipartFile) throws IOException, NoSuchAlgorithmException;
+
+    Object adminSetAllVisibility(Boolean visible);
+
+    Object getAllBrief();
 }

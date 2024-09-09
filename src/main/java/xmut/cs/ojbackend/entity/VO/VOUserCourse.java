@@ -1,5 +1,6 @@
 package xmut.cs.ojbackend.entity.VO;
 
+import com.mybatisflex.annotation.RelationOneToOne;
 import com.mybatisflex.annotation.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -35,7 +36,10 @@ public class VOUserCourse implements Serializable {
 
     private String realName;
 
-    private String grade;
+    private Integer grade;
+
+    @RelationOneToOne(selfField = "grade", targetTable = "grade", targetField = "id", valueField = "name")
+    private String gradeName;
 
     private String email;
 }

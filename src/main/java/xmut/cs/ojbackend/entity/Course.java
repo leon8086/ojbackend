@@ -1,8 +1,6 @@
 package xmut.cs.ojbackend.entity;
 
-import com.mybatisflex.annotation.Id;
-import com.mybatisflex.annotation.KeyType;
-import com.mybatisflex.annotation.Table;
+import com.mybatisflex.annotation.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -36,4 +34,7 @@ public class Course implements Serializable {
 
     private Boolean isClosed;
 
+    @Column(ignore = true)
+    @RelationOneToOne(selfField = "ownerId", targetField = "id", targetTable = "user", valueField = "username")
+    private String owner;
 }

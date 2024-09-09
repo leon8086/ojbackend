@@ -50,7 +50,6 @@ public class User implements Serializable {
 
     private String email;
 
-    @Column(onInsertValue = "9")
     private Integer adminType;
 
     private String resetPasswordToken;
@@ -63,9 +62,9 @@ public class User implements Serializable {
 
     private String realName;
 
-    private String grade;
+    private Integer grade;
 
-    @Column(onInsertValue = "false")
+    @Column(onInsertValue = "true")
     private Boolean firstLogin;
 
     @Column(onInsertValue = "0")
@@ -76,6 +75,8 @@ public class User implements Serializable {
 
     @Column(onInsertValue = "'{}'", typeHandler = Fastjson2TypeHandler.class)
     private JSONObject problemsStatus;
+
+    private Date lastAccept;
 
     public User(String username, String password) {
         this.password = password;

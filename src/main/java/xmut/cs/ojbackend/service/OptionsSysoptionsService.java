@@ -1,8 +1,9 @@
 package xmut.cs.ojbackend.service;
 
 import com.mybatisflex.core.service.IService;
-import xmut.cs.ojbackend.base.Result;
 import xmut.cs.ojbackend.entity.OptionsSysoptions;
+
+import java.util.Map;
 
 /**
  *  服务层。
@@ -15,5 +16,7 @@ public interface OptionsSysoptionsService extends IService<OptionsSysoptions> {
 
     void updateValue(String key, Object value);
 
-    Result getInfo();
+    Object getInfo();
+
+    Object updateParams(Map<String,Object> params);
 }

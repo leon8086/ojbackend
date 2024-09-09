@@ -85,4 +85,10 @@ public class VOProblemDetail implements Serializable {
 
     @RelationOneToOne(selfField = "subTagId", targetTable="problem_tag", targetField="id", valueField = "name")
     private String subTag;
+
+    @Column(ignore = true)
+    private List<VOSubmissionDetail> submissionList;
+
+    @Column(ignore = true)
+    private Integer status;
 }

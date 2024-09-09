@@ -3,13 +3,14 @@ package xmut.cs.ojbackend.entity;
 import com.mybatisflex.annotation.Id;
 import com.mybatisflex.annotation.KeyType;
 import com.mybatisflex.annotation.Table;
-import java.io.Serializable;
-import java.sql.Timestamp;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.Date;
 
 /**
  *  实体类。
@@ -24,6 +25,7 @@ import lombok.NoArgsConstructor;
 @Table(value = "judge_server")
 public class JudgeServer implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Id(keyType = KeyType.Auto)
@@ -41,9 +43,7 @@ public class JudgeServer implements Serializable {
 
     private Double cpuUsage;
 
-    private Timestamp lastHeartbeat;
-
-    private Timestamp createTime;
+    private Date lastHeartbeat;
 
     private Integer taskNumber;
 

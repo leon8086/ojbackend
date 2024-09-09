@@ -24,8 +24,6 @@ public class JudgeServerTableDef extends TableDef {
 
     public final QueryColumn HOSTNAME = new QueryColumn(this, "hostname");
 
-    public final QueryColumn CREATE_TIME = new QueryColumn(this, "create_time");
-
     public final QueryColumn IS_DISABLED = new QueryColumn(this, "is_disabled");
 
     public final QueryColumn SERVICE_URL = new QueryColumn(this, "service_url");
@@ -46,7 +44,7 @@ public class JudgeServerTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, IP, CPU_CORE, CPU_USAGE, HOSTNAME, CREATE_TIME, IS_DISABLED, SERVICE_URL, TASK_NUMBER, MEMORY_USAGE, JUDGER_VERSION, LAST_HEARTBEAT};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, IP, CPU_CORE, CPU_USAGE, HOSTNAME, IS_DISABLED, SERVICE_URL, TASK_NUMBER, MEMORY_USAGE, JUDGER_VERSION, LAST_HEARTBEAT};
 
     public JudgeServerTableDef() {
         super("", "judge_server");

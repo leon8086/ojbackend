@@ -28,7 +28,7 @@ public class Codegen {
         GlobalConfig globalConfig = new GlobalConfig();
 
         //设置根包
-        globalConfig.setBasePackage("xmut.cs.tmp");
+        globalConfig.setBasePackage("xmut.cs.ojbackend");
 
         //设置表前缀和只生成哪些表
         globalConfig.setGenerateTable("user");
@@ -54,19 +54,10 @@ public class Codegen {
 
         //设置表前缀和只生成哪些表，setGenerateTable 未配置时，生成所有表
         globalConfig.getStrategyConfig()
-                .setGenerateTable( "course", "course_user", "exam", "exam_profile",
-                    "exam_submission","options_sysoptions",
-                    "problem", "problem_tag", "problem_tags", "submission", "user"
-                );
-                //.setGenerateTable("course_user");
-                //.setGenerateTable("user_table");
-                //.setGenerateTable("exam","exam_profiles","exam_submissions");
-//                .setGenerateTable(
-//                        "auth_group", "auth_group_permissions", "auth_permission",
-//                        "contest", "contest_announcement", "course",
-//                        "judge_server", "oi_contest_rank", "options_sysoptions",
-//                        "problem", "problem_tag", "problem_tags",
-//                        "submission", "user", "user_profile"
+                .setGenerateTable( "grade" );
+//                .setGenerateTable( "course", "course_user", "exam", "exam_profile",
+//                    "exam_submission","options_sysoptions",
+//                    "problem", "problem_tag", "problem_tags", "submission", "user"
 //                );
         //设置生成 entity 并启用 Lombok
         globalConfig.enableEntity()
@@ -76,11 +67,11 @@ public class Codegen {
         globalConfig.enableMapper();
 
         //设置生成 service()
-        //globalConfig.enableService();
+        globalConfig.enableService();
 
-        //globalConfig.enableServiceImpl();
+        globalConfig.enableServiceImpl();
 
-        //globalConfig.enableController();
+        globalConfig.enableController();
 
 
         return globalConfig;

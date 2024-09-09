@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.mybatisflex.core.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -15,14 +16,19 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import xmut.cs.ojbackend.entity.*;
+import xmut.cs.ojbackend.mapper.ScoreMapper;
 import xmut.cs.ojbackend.mapper.SubmissionMapper;
 import xmut.cs.ojbackend.mapper.exam.ExamSubmissionMapper;
+import xmut.cs.ojbackend.service.JudgeServerService;
 import xmut.cs.ojbackend.service.OptionsSysoptionsService;
 import xmut.cs.ojbackend.service.ProblemService;
 import xmut.cs.ojbackend.service.UserService;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.concurrent.TimeUnit;
+
+import static xmut.cs.ojbackend.entity.table.ScoreTableDef.SCORE;
 
 
 @Component
@@ -44,18 +50,25 @@ public class JudgeUtil {
     private ExamSubmissionMapper examSubmissionMapper;
 
     @Autowired
+    private ScoreMapper scoreMapper;
+
+    @Autowired
+    JudgeServerService judgeServerService;
+
+    @Autowired
     private CommonUtil commonUtil;
 
-    @Value("${judge-server.url}")
-    private String JudgeServerUrl;
+//    @Value("${judge-server.url}")
+//    private String JudgeServerUrl;
+
+    @Value("${judge-server.token}")
+    public String judgeToken;
 
     @Autowired
     RedisTemplate<Object, Object> redisTemplate;
 
     public static final int COMPILE_ERROR = -2;
 
-    public static String token = "CHANGE_THIS";
-    private String serverBaseUrl;
     public static final int WRONG_ANSWER = -1;
     public static final int ACCEPTED = 0;
     public static final int CPU_TIME_LIMIT_EXCEEDED = 1;
@@ -107,8 +120,8 @@ public class JudgeUtil {
     public JSONObject getJudgeResult( Problem problem, String code, String language, String judgeUrl, String token ) throws JsonProcessingException {
         RestTemplate restTemplate = new RestTemplate();
 
-        if(!problem.getTemplate().isEmpty() && !problem.getTemplate().getString(language).isEmpty()) {
-            code = commonUtil.applyCPPTemplate(problem.getTemplate().getString(language), code);
+        if(!problem.getTemplate().isEmpty() && !problem.getTemplate().getJSONObject(language).isEmpty()) {
+            code = commonUtil.applyTemplate(problem.getTemplate().getJSONObject(language), code);
         }
         else{
             code = code;
@@ -128,6 +141,7 @@ public class JudgeUtil {
         taskInfo.put("spj_config", null);
         taskInfo.put("spj_compile_config", null);
         taskInfo.put("spj_src", null);
+        //taskInfo.put("output", false);
         taskInfo.put("output", true);
         //创建请求体
         HttpEntity<String> entity = new HttpEntity<>(taskInfo.toString(), headers);
@@ -136,23 +150,27 @@ public class JudgeUtil {
         String data = responseEntity.getBody();
         return JSON.parseObject(data);
     }
-    public void judgeExam( ExamSubmission examSubmission, Problem problem, String judgeUrl, String token ) throws JsonProcessingException{
+
+    public void judgeExam( ExamSubmission examSubmission, Problem problem ) throws JsonProcessingException{
         //向判题服务器发送post请求
-        judge(examSubmission, problem, judgeUrl, token);
+        judge(examSubmission, problem);
         examSubmissionMapper.update(examSubmission);
         // 更新exam的状态
     }
 
-    public void judgeNormal( Submission submission, Problem problem, String judgeUrl, String token ) throws JsonProcessingException {
-        judge(submission, problem, judgeUrl, token);
+    public void judgeNormal( Submission submission, Problem problem ) throws JsonProcessingException {
+        judge(submission, problem);
         submissionMapper.update(submission);
-        update_problem_status(submission, problem);
-        update_userprofile(submission, problem);
+        updateProblemStatus(submission, problem);
+        updateUserprofile(submission, problem);
     }
 
     @Async("AsyncJudgeConfig")
-    public void judge( Submission submission, Problem problem, String judgeUrl, String token ) throws JsonProcessingException{
-        JSONObject result = getJudgeResult(problem, submission.getCode(), submission.getLanguage(), judgeUrl, token);
+    public void judge( Submission submission, Problem problem ) throws JsonProcessingException{
+
+        String judgeUrl = judgeServerService.selectServer();
+//        System.out.println(judgeUrl);
+        JSONObject result = getJudgeResult(problem, submission.getCode(), submission.getLanguage(), judgeUrl, judgeToken);
         //System.out.println(result);
         if (result.get("err") != null) {
             JSONObject staticInfo = new JSONObject();
@@ -208,7 +226,7 @@ public class JudgeUtil {
         submission.setStatisticInfo(staticInfo);
     }
 
-    private void update_problem_status(Submission submission, Problem problem) {
+    private void updateProblemStatus(Submission submission, Problem problem) {
         int result = submission.getResult();
         problem.setSubmissionNumber(problem.getSubmissionNumber() + 1);
         if (submission.getResult() == ACCEPTED) {
@@ -220,7 +238,25 @@ public class JudgeUtil {
         problemService.updateById(problem);
     }
 
-    private void update_userprofile(Submission submission, Problem problem) {
+    private void updateScore( User user, Integer major ){
+        QueryWrapper wrapper = new QueryWrapper();
+        wrapper.where( SCORE.USER_ID.eq( user.getId()) );
+        wrapper.and( SCORE.MAJOR_TAG.eq(major));
+        Score score = scoreMapper.selectOneByQuery(wrapper);
+        if( score == null ){
+            score = new Score();
+            score.setUserId(user.getId());
+            score.setMajorTag(major);
+            score.setScore(1);
+            scoreMapper.insert(score);
+        }
+        else{
+            score.setScore(score.getScore()+1);
+            scoreMapper.update(score);
+        }
+    }
+
+    private void updateUserprofile(Submission submission, Problem problem) {
         // update_userprofile
         //UserProfile userProfile = userProfileService.getByUserId(submission.getUserId());
         User user = userService.getById(submission.getUserId());
@@ -236,22 +272,27 @@ public class JudgeUtil {
             oiProblemsStatus.getJSONObject(String.valueOf(problem.getId())).put("score", score);
             if (submission.getResult() == ACCEPTED) {
                 user.setAcceptedNumber(user.getAcceptedNumber() + 1);
+                user.setLastAccept(submission.getCreateTime());
+                updateScore(user, problem.getMajorTagId());
             }
         } else {
             if (oiProblemsStatus.getJSONObject(String.valueOf(problem.getId())).getIntValue("status") != ACCEPTED) {
-                oiProblemsStatus.getJSONObject(String.valueOf(problem.getId())).put("score", score);
-                oiProblemsStatus.getJSONObject(String.valueOf(problem.getId())).put("status", submission.getResult());
+                if(oiProblemsStatus.getJSONObject(String.valueOf(problem.getId())).getIntValue("score") < score ){
+                    oiProblemsStatus.getJSONObject(String.valueOf(problem.getId())).put("score", score);
+                    oiProblemsStatus.getJSONObject(String.valueOf(problem.getId())).put("status", submission.getResult());
+                }
                 if (submission.getResult() == ACCEPTED) {
                     user.setAcceptedNumber(user.getAcceptedNumber() + 1);
+                    user.setLastAccept(submission.getCreateTime());
+                    updateScore(user, problem.getMajorTagId());
                 }
             }
         }
         user.setProblemsStatus(oiProblemsStatus);
         userService.updateById(user);
-    }
 
-    //        if self.contest.rule_type == ContestRuleType.OI or self.contest.real_time_rank:
-//            cache.delete(f"{CacheKey.contest_rank_cache}:{self.contest.id}")
-    private void update_exam_info(ExamSubmission examSubmission, Problem problem, Exam exam) {
+        String key = "user-id:"+user.getId().toString();
+        //需要更新redis数据。
+        redisTemplate.opsForValue().set(key, user, 7, TimeUnit.DAYS);
     }
 }

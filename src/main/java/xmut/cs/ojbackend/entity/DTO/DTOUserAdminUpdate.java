@@ -37,5 +37,5 @@ public class DTOUserAdminUpdate implements Serializable {
 
     private String email;
 
-    private String grade;
+    private Integer grade;
 }

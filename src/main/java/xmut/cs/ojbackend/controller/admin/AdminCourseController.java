@@ -1,14 +1,14 @@
 package xmut.cs.ojbackend.controller.admin;
 
-import com.mybatisflex.core.paginate.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import xmut.cs.ojbackend.base.Result;
 import xmut.cs.ojbackend.entity.Course;
 import xmut.cs.ojbackend.entity.DTO.DTOCourseImport;
+import xmut.cs.ojbackend.entity.DTO.DTOCourseUserUpdate;
 import xmut.cs.ojbackend.service.CourseService;
 
-import java.io.Serializable;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/admin/course")
@@ -19,7 +19,7 @@ public class AdminCourseController {
 
     @PostMapping("update")
     public Result update(@RequestBody Course course) {
-        System.out.println(course);
+        //System.out.println(course);
         if( course.getId() == null ){
             return Result.success(courseService.save(course));
         }
@@ -28,14 +28,19 @@ public class AdminCourseController {
         }
     }
 
-    /**
-     * 查询所有。
-     *
-     * @return 所有数据
-     */
     @GetMapping("list")
     public Result listPage( Integer page, Integer limit, String keyword  ){
         return Result.success(courseService.listPage(page, limit, keyword));
+    }
+
+    @GetMapping("list-by-user")
+    public Result listPageByUser( Integer page, Integer limit, String keyword  ){
+        return Result.success(courseService.listPageByUser(page, limit, keyword));
+    }
+
+    @GetMapping("all")
+    public Result allBrief(){
+        return Result.success( courseService.adminAllBrief() );
     }
 
     @PostMapping("import-students")
@@ -44,26 +49,20 @@ public class AdminCourseController {
         return Result.success( courseService.importStudent(course));
     }
 
-    /**
-     * 根据主键获取详细信息。
-     *
-     * @param id 主键
-     * @return 详情
-     */
-    @GetMapping("getInfo/{id}")
-    public Course getInfo(@PathVariable Serializable id) {
-        return courseService.getById(id);
+    @PostMapping("remove-student")
+    public Result removeStudent( @RequestBody Map<String, Integer> params ){
+        Integer studentId = params.get("studentId");
+        Integer courseId = params.get("courseId");
+        return Result.success( courseService.adminRmoveStudent(studentId, courseId));
     }
 
-    /**
-     * 分页查询。
-     *
-     * @param page 分页对象
-     * @return 分页对象
-     */
-    @GetMapping("page")
-    public Page<Course> page(Page<Course> page) {
-        return courseService.page(page);
+    @GetMapping("students")
+    public Result getCourseStudents( Integer id ){
+        return Result.success( courseService.getCourseStudents( id ) );
     }
 
+    @PostMapping("update-students")
+    public Result updateStudents( @RequestBody DTOCourseUserUpdate params ){
+        return Result.success(courseService.updateStudents(params));
+    }
 }

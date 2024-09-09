@@ -12,6 +12,7 @@ public class Result {
     public static final Integer LOGIN_FAILED=210;
     public static final Integer AUTHENTICATION_FAILED=211;
     public static final Integer ACCESS_DENIED=212;
+    public static final Integer EXAM_CHECK_FAILED=213;
     public static final Integer WRONG_PARAMS=220;
     public static final Integer INVALID_FILE_CONTENT=230;
     public static final Integer FILE_TOO_LARGE=231;
@@ -23,6 +24,7 @@ public class Result {
         put(LOGIN_FAILED, "用户名或密码错误");
         put(AUTHENTICATION_FAILED, "未登录，请先登录");
         put(ACCESS_DENIED, "权限不足");
+        put(EXAM_CHECK_FAILED, "考试调用失败");
         put(WRONG_PARAMS, "参数错误");
         put(INVALID_FILE_CONTENT, "错误的文件类型");
         put(FILE_TOO_LARGE, "文件大小超限");
@@ -37,7 +39,7 @@ public class Result {
         this.code = code;
         this.message = msg;
         this.data = data;
-        System.out.println(this);
+        //System.out.println(this);
     }
 
     public Result( Integer code, Object data ){

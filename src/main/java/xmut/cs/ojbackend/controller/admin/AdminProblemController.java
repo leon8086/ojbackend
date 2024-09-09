@@ -5,13 +5,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import xmut.cs.ojbackend.base.Result;
-import xmut.cs.ojbackend.entity.DTO.DTOProblemVisible;
 import xmut.cs.ojbackend.entity.Problem;
 import xmut.cs.ojbackend.service.ProblemService;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.Map;
 
 /**
  *  控制层。
@@ -39,9 +39,16 @@ public class AdminProblemController {
     }
 
     @PostMapping("visible")
-    public Object setVisibility(@RequestBody DTOProblemVisible problemVisible){
-        System.out.println(problemVisible);
-        return Result.success(problemService.adminSetVisibility(problemVisible.getId(), problemVisible.getVisible()));
+    public Object setVisibility(@RequestBody Map<String, Object> params ){
+        List<Integer> ids = (List<Integer>)params.get("ids");
+        Boolean visible = (Boolean)params.get("visible");
+        return Result.success(problemService.adminSetVisibility(ids, visible));
+    }
+
+    @PostMapping("all-visible")
+    public Object setAllVisibility(@RequestBody Map<String, Object> params){
+        Boolean visible = (Boolean)params.get("visible");
+        return Result.success(problemService.adminSetAllVisibility(visible));
     }
 
     @PostMapping("import")

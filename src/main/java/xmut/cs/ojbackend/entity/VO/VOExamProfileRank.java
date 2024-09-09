@@ -13,6 +13,7 @@ import xmut.cs.ojbackend.entity.User;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  *  实体类。
@@ -25,7 +26,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(value = "exam_profile")
-public class VOExamRank implements Serializable {
+public class VOExamProfileRank implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -47,6 +48,8 @@ public class VOExamRank implements Serializable {
 
     @Column(typeHandler = Fastjson2TypeHandler.class)
     private JSONObject info;
+
+    private Date lastUpdate;
 
     private Boolean isEnded;
 }

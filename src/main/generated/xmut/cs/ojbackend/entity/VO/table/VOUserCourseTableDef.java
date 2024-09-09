@@ -26,6 +26,8 @@ public class VOUserCourseTableDef extends TableDef {
 
     public final QueryColumn ADMIN_TYPE = new QueryColumn(this, "admin_type");
 
+    public final QueryColumn GRADE_NAME = new QueryColumn(this, "grade_name");
+
     public final QueryColumn IS_DISABLED = new QueryColumn(this, "is_disabled");
 
     /**
@@ -36,7 +38,7 @@ public class VOUserCourseTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, EMAIL, GRADE, REAL_NAME, USERNAME, ADMIN_TYPE, IS_DISABLED};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, EMAIL, GRADE, REAL_NAME, USERNAME, ADMIN_TYPE, GRADE_NAME, IS_DISABLED};
 
     public VOUserCourseTableDef() {
         super("", "user");

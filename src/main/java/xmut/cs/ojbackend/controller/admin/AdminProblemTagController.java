@@ -22,12 +22,12 @@ public class AdminProblemTagController {
 
     @GetMapping("list-major")
     public Object listMajor( String keyword) {
-        return Result.success(problemTagService.adminListMajor( keyword));
+        return Result.success(problemTagService.listMajor( keyword));
     }
 
     @PostMapping("new")
     public Result newTag(@RequestBody Map<String, Object> params ){
-        System.out.println(params);
+        //System.out.println(params);
         String name = (String)params.get("name");
         Integer parentId = (Integer) params.get("parentId");
         return Result.success(problemTagService.addTag( name, parentId ));

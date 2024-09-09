@@ -32,7 +32,7 @@ public class Pkdf2Encoder implements PasswordEncoder {
         try {
             secret = keyFactory.generateSecret(keySpec);
         } catch (InvalidKeySpecException e) {
-            System.out.println("Could NOT generate secret key");
+            //System.out.println("Could NOT generate secret key");
             e.printStackTrace();
         }
 
@@ -83,8 +83,8 @@ public class Pkdf2Encoder implements PasswordEncoder {
         Integer iterations = Integer.parseInt(parts[1]);
         String salt = parts[2];
         String hash = encode(password, salt, iterations);
-        System.out.println(hash);
-        System.out.println(hashedPassword);
+        //System.out.println(hash);
+        //System.out.println(hashedPassword);
 
         return hash.equals(hashedPassword);
     }

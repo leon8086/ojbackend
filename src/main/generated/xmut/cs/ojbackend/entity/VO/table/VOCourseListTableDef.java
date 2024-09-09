@@ -16,8 +16,6 @@ public class VOCourseListTableDef extends TableDef {
 
     public final QueryColumn ID = new QueryColumn(this, "id");
 
-    public final QueryColumn OWNER = new QueryColumn(this, "owner");
-
     public final QueryColumn OWNER_ID = new QueryColumn(this, "owner_id");
 
     public final QueryColumn IS_CLOSED = new QueryColumn(this, "is_closed");
@@ -32,7 +30,7 @@ public class VOCourseListTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, OWNER, OWNER_ID, IS_CLOSED, COURSE_NAME};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, OWNER_ID, IS_CLOSED, COURSE_NAME};
 
     public VOCourseListTableDef() {
         super("", "course");

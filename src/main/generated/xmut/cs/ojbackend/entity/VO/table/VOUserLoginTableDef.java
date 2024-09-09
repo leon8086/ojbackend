@@ -30,6 +30,10 @@ public class VOUserLoginTableDef extends TableDef {
 
     public final QueryColumn ADMIN_TYPE = new QueryColumn(this, "admin_type");
 
+    public final QueryColumn GRADE_NAME = new QueryColumn(this, "grade_name");
+
+    public final QueryColumn FIRST_LOGIN = new QueryColumn(this, "first_login");
+
     public final QueryColumn IS_DISABLED = new QueryColumn(this, "is_disabled");
 
     /**
@@ -40,7 +44,7 @@ public class VOUserLoginTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, EMAIL, GRADE, TOKEN, AVATAR, REAL_NAME, USERNAME, ADMIN_TYPE, IS_DISABLED};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, EMAIL, GRADE, TOKEN, AVATAR, REAL_NAME, USERNAME, ADMIN_TYPE, GRADE_NAME, FIRST_LOGIN, IS_DISABLED};
 
     public VOUserLoginTableDef() {
         super("", "user");

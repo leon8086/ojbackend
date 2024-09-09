@@ -4,7 +4,7 @@ import com.mybatisflex.core.query.QueryColumn;
 import com.mybatisflex.core.table.TableDef;
 
 // Auto generate by mybatis-flex, do not modify it.
-public class VOExamRankTableDef extends TableDef {
+public class VOExamProfileRankTableDef extends TableDef {
 
     /**
      * 实体类。
@@ -12,7 +12,7 @@ public class VOExamRankTableDef extends TableDef {
  @author leon
  @since 2024-06-26
      */
-    public static final VOExamRankTableDef V_O_EXAM_RANK = new VOExamRankTableDef();
+    public static final VOExamProfileRankTableDef V_O_EXAM_PROFILE_RANK = new VOExamProfileRankTableDef();
 
     public final QueryColumn ID = new QueryColumn(this, "id");
 
@@ -26,6 +26,8 @@ public class VOExamRankTableDef extends TableDef {
 
     public final QueryColumn IS_ENDED = new QueryColumn(this, "is_ended");
 
+    public final QueryColumn LAST_UPDATE = new QueryColumn(this, "last_update");
+
     public final QueryColumn PROBLEM_CONFIG = new QueryColumn(this, "problem_config");
 
     /**
@@ -36,19 +38,19 @@ public class VOExamRankTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, INFO, SCORE, EXAM_ID, USER_ID, IS_ENDED, PROBLEM_CONFIG};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, INFO, SCORE, EXAM_ID, USER_ID, IS_ENDED, LAST_UPDATE, PROBLEM_CONFIG};
 
-    public VOExamRankTableDef() {
+    public VOExamProfileRankTableDef() {
         super("", "exam_profile");
     }
 
-    private VOExamRankTableDef(String schema, String name, String alisa) {
+    private VOExamProfileRankTableDef(String schema, String name, String alisa) {
         super(schema, name, alisa);
     }
 
-    public VOExamRankTableDef as(String alias) {
+    public VOExamProfileRankTableDef as(String alias) {
         String key = getNameWithSchema() + "." + alias;
-        return getCache(key, k -> new VOExamRankTableDef("", "exam_profile", alias));
+        return getCache(key, k -> new VOExamProfileRankTableDef("", "exam_profile", alias));
     }
 
 }

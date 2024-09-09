@@ -38,6 +38,8 @@ public class UserTableDef extends TableDef {
 
     public final QueryColumn IS_DISABLED = new QueryColumn(this, "is_disabled");
 
+    public final QueryColumn LAST_ACCEPT = new QueryColumn(this, "last_accept");
+
     public final QueryColumn ACCEPTED_NUMBER = new QueryColumn(this, "accepted_number");
 
     public final QueryColumn PROBLEMS_STATUS = new QueryColumn(this, "problems_status");
@@ -56,7 +58,7 @@ public class UserTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, EMAIL, GRADE, AVATAR, PASSWORD, REAL_NAME, USERNAME, ADMIN_TYPE, LAST_LOGIN, CREATE_TIME, FIRST_LOGIN, IS_DISABLED, ACCEPTED_NUMBER, PROBLEMS_STATUS, SUBMISSION_NUMBER, RESET_PASSWORD_TOKEN, RESET_PASSWORD_TOKEN_EXPIRE_TIME};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, EMAIL, GRADE, AVATAR, PASSWORD, REAL_NAME, USERNAME, ADMIN_TYPE, LAST_LOGIN, CREATE_TIME, FIRST_LOGIN, IS_DISABLED, LAST_ACCEPT, ACCEPTED_NUMBER, PROBLEMS_STATUS, SUBMISSION_NUMBER, RESET_PASSWORD_TOKEN, RESET_PASSWORD_TOKEN_EXPIRE_TIME};
 
     public UserTableDef() {
         super("", "user");

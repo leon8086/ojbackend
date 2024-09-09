@@ -9,7 +9,11 @@ import xmut.cs.ojbackend.base.Result;
 import xmut.cs.ojbackend.entity.LoginUser;
 import xmut.cs.ojbackend.entity.Submission;
 import xmut.cs.ojbackend.entity.User;
+import xmut.cs.ojbackend.entity.VO.VOSubmissionDetail;
 import xmut.cs.ojbackend.service.SubmissionService;
+import xmut.cs.ojbackend.utils.CommonUtil;
+
+import java.util.Objects;
 
 /**
  *  控制层。
@@ -27,26 +31,32 @@ public class SubmissionController {
     @Autowired
     private HttpServletRequest request;
 
+    @Autowired
+    private CommonUtil commonUtil;
+
     //@PostMapping("save")
     public boolean save(@RequestBody Submission submission) {
         return submissionService.save(submission);
     }
 
     @GetMapping("list")
-    public Object list( Integer page, Integer limit, Integer result, String username ){
+    public Object list( Integer page, Integer limit, Integer result, String username, Integer myself ){
+        if( myself == 1 ){
+            username = commonUtil.getCurrentUser().getUsername();
+        }
         Object ret = Result.success(submissionService.listPage(page, limit, result, username ));
         return ret;
-    }
-
-    @GetMapping("exam_list")
-    public Object listExam(){
-        return submissionService.listExam();
     }
 
     @GetMapping("get")
     public Object getInfo( String id ) {
         //return Result.success(submissionService.getById(id));
-        return submissionService.getInfo(id);
+        VOSubmissionDetail ret = submissionService.getInfo(id);
+        User user = commonUtil.getCurrentUser();
+        if(Objects.equals(user.getAdminType(), User.ADMINTYPE_REGULAR) && !Objects.equals(user.getId(), ret.getUserId())){
+            return Result.error( Result.ACCESS_DENIED );
+        }
+        return Result.success(ret);
     }
 
     @GetMapping("result")
@@ -58,7 +68,8 @@ public class SubmissionController {
     public Object submitCode( @RequestBody Submission submission ) throws JsonProcessingException{
         LoginUser loginUser = (LoginUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = loginUser.getUser();
-        return submissionService.submitCode(submission, request.getRemoteAddr(), user);
+        //return submissionService.submitCode(submission, request.getRemoteAddr(), user);
+        return submissionService.submitCode(submission, commonUtil.getIpAddr(request), user);
     }
 
 }

@@ -51,7 +51,7 @@ public class Problem implements Serializable {
     @Column(typeHandler = Fastjson2TypeHandler.class)
     private List<String> languages;
 
-    @Column(onInsertValue = "'{}'", typeHandler = Fastjson2TypeHandler.class)
+    @Column(typeHandler = Fastjson2TypeHandler.class)
     private JSONObject template;
 
     private Date createTime;
@@ -83,9 +83,7 @@ public class Problem implements Serializable {
 
     private Integer totalScore;
 
-    @Column(onInsertValue = "null")
     private Integer majorTagId;
 
-    @Column(onInsertValue = "null")
     private Integer subTagId;
 }

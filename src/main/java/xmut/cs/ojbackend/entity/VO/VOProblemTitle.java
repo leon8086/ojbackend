@@ -45,4 +45,7 @@ public class VOProblemTitle implements Serializable {
 
     @RelationOneToOne(selfField = "subTagId", targetTable="problem_tag", targetField="id", valueField = "name")
     private String subTag;
+
+    @Column(ignore = true)
+    private Integer status;
 }

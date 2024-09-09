@@ -20,6 +20,8 @@ public class ExamTableDef extends TableDef {
 
     public final QueryColumn END_TIME = new QueryColumn(this, "end_time");
 
+    public final QueryColumn IS_ENDED = new QueryColumn(this, "is_ended");
+
     public final QueryColumn VISIBLE = new QueryColumn(this, "visible");
 
     public final QueryColumn COURSE_ID = new QueryColumn(this, "course_id");
@@ -29,6 +31,8 @@ public class ExamTableDef extends TableDef {
     public final QueryColumn CREATE_TIME = new QueryColumn(this, "create_time");
 
     public final QueryColumn DESCRIPTION = new QueryColumn(this, "description");
+
+    public final QueryColumn PROBLEM_COUNT = new QueryColumn(this, "problem_count");
 
     public final QueryColumn PROBLEM_CONFIG = new QueryColumn(this, "problem_config");
 
@@ -44,7 +48,7 @@ public class ExamTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, TITLE, END_TIME, VISIBLE, COURSE_ID, START_TIME, CREATE_TIME, DESCRIPTION, PROBLEM_CONFIG, LAST_UPDATE_TIME, ALLOWED_IP_RANGES};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, TITLE, END_TIME, IS_ENDED, VISIBLE, COURSE_ID, START_TIME, CREATE_TIME, DESCRIPTION, PROBLEM_COUNT, PROBLEM_CONFIG, LAST_UPDATE_TIME, ALLOWED_IP_RANGES};
 
     public ExamTableDef() {
         super("", "exam");
