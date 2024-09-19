@@ -188,7 +188,7 @@ public class ProblemServiceImpl extends ServiceImpl<ProblemMapper, Problem> impl
         applyKeyword( wrapper, keyword );
         applyDifficulty( wrapper, difficulty );
         wrapper.orderBy(PROBLEM.DISPLAY_ID.asc());
-        return problemMapper.paginateAs(page, limit, wrapper, VOProblemBrief.class);
+        return problemMapper.paginateWithRelationsAs(page, limit, wrapper, VOProblemTitle.class);
     }
 
     @Override
@@ -446,11 +446,11 @@ public class ProblemServiceImpl extends ServiceImpl<ProblemMapper, Problem> impl
     @Override
     public Object getAllBrief() {
         JSONArray data;
-        List<VOProblemBrief> ret;
+        List<VOProblemStatistic> ret;
         if(Boolean.TRUE.equals(redisTemplate.hasKey("problems-title"))){
             data = (JSONArray) redisTemplate.opsForValue().get("problems-title");
             if (data != null) {
-                ret = JSONArray.parseArray(data.toJSONString(), VOProblemBrief.class);
+                ret = JSONArray.parseArray(data.toJSONString(), VOProblemStatistic.class);
             }
             else{
                 ret = new ArrayList<>();
@@ -460,7 +460,8 @@ public class ProblemServiceImpl extends ServiceImpl<ProblemMapper, Problem> impl
             QueryWrapper wrapper = new QueryWrapper();
             wrapper.where( PROBLEM.VISIBLE.eq(true));
             wrapper.orderBy(PROBLEM.DISPLAY_ID.asc());
-            ret = mapper.selectListByQueryAs( wrapper, VOProblemBrief.class);
+            ret = mapper.selectListWithRelationsByQueryAs( wrapper, VOProblemStatistic.class);
+            //ret = mapper.selectListByQueryAs( wrapper, VOProblemStatistic.class);
             data = JSONArray.from(ret);
             redisTemplate.opsForValue().set("problems-title", data );
         }

@@ -72,4 +72,8 @@ public class SubmissionController {
         return submissionService.submitCode(submission, commonUtil.getIpAddr(request), user);
     }
 
+    @GetMapping("all")
+    public Object all(){
+        return Result.success(submissionService.allMySubmission());
+    }
 }

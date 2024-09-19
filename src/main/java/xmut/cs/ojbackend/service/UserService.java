@@ -66,4 +66,6 @@ public interface UserService extends IService<User> {
     public Object listGetCourseAddStudent(String keyword, Integer courseId);
 
     Object listNoAdmin();
+
+    Object adminGetUser(Integer id);
 }

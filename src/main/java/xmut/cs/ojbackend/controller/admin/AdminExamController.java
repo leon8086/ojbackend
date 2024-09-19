@@ -48,8 +48,8 @@ public class AdminExamController {
     }
 
     @GetMapping("submission")
-    public Result getExamSubmission( Integer examId, Integer userId, Integer problemId ){
-        return Result.success(examService.adminGetExamSubmission(examId, userId, problemId));
+    public Result getExamSubmission( Integer examId, Integer userId ){
+        return Result.success(examService.adminGetExamSubmission(examId, userId));
     }
 
     @PostMapping("close")
@@ -59,5 +59,10 @@ public class AdminExamController {
 
         Object ret = examService.adminCloseExam( id, isEnded );
         return Result.success(ret);
+    }
+
+    @GetMapping("user-profile")
+    public Result userProfile( Integer examId, Integer userId ){
+        return Result.success( examService.adminGetUserExamProfile( examId, userId ) );
     }
 }

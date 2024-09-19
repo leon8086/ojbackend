@@ -35,7 +35,7 @@ public interface ExamService extends IService<Exam> {
 
     Object submitCode(ExamSubmission examSubmission, String ip, User user) throws JsonProcessingException, ExamCheckException;
 
-    Object getProblemSubmission(String examId, Integer problemId, Integer userId);
+    Object getProblemSubmission(String examId);
 
     Object getSubmissionById(String id);
 
@@ -49,7 +49,9 @@ public interface ExamService extends IService<Exam> {
 
     Object listPageExam( Integer page, Integer limit, Integer courseId, String keyword );
 
-    Object adminGetExamSubmission(Integer examId, Integer userId, Integer problemId);
+    Object adminGetExamSubmission(Integer examId, Integer userId);
 
     Object restart(Integer id, Date endTime);
+
+    Object adminGetUserExamProfile(Integer examId, Integer userId);
 }

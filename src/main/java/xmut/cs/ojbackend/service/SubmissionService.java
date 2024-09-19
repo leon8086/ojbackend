@@ -21,4 +21,8 @@ public interface SubmissionService extends IService<Submission> {
     public Object getSubmitResult( String id );
 
     VOSubmissionDetail getInfo(String id);
+
+    Object allMySubmission();
+
+    Object adminGetUserSubmissions(Integer id);
 }

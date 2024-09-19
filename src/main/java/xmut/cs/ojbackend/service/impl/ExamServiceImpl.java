@@ -123,8 +123,8 @@ public class ExamServiceImpl extends ServiceImpl<ExamMapper, Exam> implements Ex
         for( int i=0; i<ranges.size(); ++i ){
             String subnet = ranges.getString(i);
             IpAddressMatcher ipAddressMatcher = new IpAddressMatcher(subnet);
-            System.out.println(ip);
-            System.out.println(ipAddressMatcher.matches(ip));
+            //System.out.println(ip);
+            //System.out.println(ipAddressMatcher.matches(ip));
             if( ipAddressMatcher.matches(ip)){
                 return false;
             }
@@ -347,11 +347,11 @@ public class ExamServiceImpl extends ServiceImpl<ExamMapper, Exam> implements Ex
     }
 
     @Override
-    public Object adminGetExamSubmission( Integer examId, Integer userId, Integer problemId ){
+    public Object adminGetExamSubmission( Integer examId, Integer userId ){
         QueryWrapper wrapper = new QueryWrapper();
         wrapper.where( EXAM_SUBMISSION.EXAM_ID.eq(examId));
         wrapper.and( EXAM_SUBMISSION.USER_ID.eq(userId));
-        wrapper.and(EXAM_SUBMISSION.PROBLEM_ID.eq(problemId));
+        wrapper.orderBy(EXAM_SUBMISSION.CREATE_TIME.desc());
         return examSubmissionMapper.selectListWithRelationsByQueryAs(wrapper, VOSubmissionDetail.class);
     }
 
@@ -363,6 +363,14 @@ public class ExamServiceImpl extends ServiceImpl<ExamMapper, Exam> implements Ex
         mapper.update(exam);
         setExamProfilesEnded(exam, false);
         return "更新成功";
+    }
+
+    @Override
+    public Object adminGetUserExamProfile(Integer examId, Integer userId) {
+        QueryWrapper wrapper = new QueryWrapper();
+        wrapper.where( EXAM_PROFILE.USER_ID.eq(userId));
+        wrapper.where( EXAM_PROFILE.EXAM_ID.eq(examId));
+        return examProfilesMapper.selectOneByQuery(wrapper);
     }
 
     @Override
@@ -443,6 +451,7 @@ public class ExamServiceImpl extends ServiceImpl<ExamMapper, Exam> implements Ex
             });
         }
         Page<VOExamBrief> pg = commonUtil.genPage(page, limit);
+        wrapper.orderBy( EXAM.START_TIME.desc());
         pg = examMapper.paginateWithRelationsAs( pg, wrapper, VOExamBrief.class);
         for( VOExamBrief b : pg.getRecords() ){
             if( b.getEndTime().before(Calendar.getInstance().getTime())){
@@ -510,6 +519,12 @@ public class ExamServiceImpl extends ServiceImpl<ExamMapper, Exam> implements Ex
 
         JSONObject obj = profile.getInfo();
         Integer oldScore = obj.getInteger(examSubmission.getProblemId().toString());
+        Integer submitCount = obj.getIntValue("count_"+examSubmission.getProblemId().toString());
+        if( submitCount == null){
+            submitCount = 0;
+        }
+        submitCount ++;
+        obj.put("count_"+examSubmission.getProblemId().toString(), submitCount);
         Integer newScore = examSubmission.getStatisticInfo().getInteger("score");
         if( oldScore < newScore ){
             obj.put(examSubmission.getProblemId().toString(), newScore);
@@ -520,17 +535,17 @@ public class ExamServiceImpl extends ServiceImpl<ExamMapper, Exam> implements Ex
             //System.out.println(totalScore);
             profile.setScore(totalScore);
             profile.setLastUpdate(calendar.getTime());
-            examProfilesMapper.update(profile);
         }
+        examProfilesMapper.update(profile);
         return examSubmission;
     }
 
     @Override
-    public Object getProblemSubmission(String examId, Integer problemId, Integer userId) {
+    public Object getProblemSubmission(String examId) {
+        User user = commonUtil.getCurrentUser();
         QueryWrapper wrapper = new QueryWrapper();
         wrapper.and(EXAM_SUBMISSION.EXAM_ID.eq(examId));
-        wrapper.and(EXAM_SUBMISSION.PROBLEM_ID.eq(problemId));
-        wrapper.and(EXAM_SUBMISSION.USER_ID.eq(userId));
+        wrapper.and(EXAM_SUBMISSION.USER_ID.eq(user.getId()));
         wrapper.orderBy(EXAM_SUBMISSION.CREATE_TIME.desc());
         return examSubmissionMapper.selectListByQueryAs(wrapper, VOSubmissionDetail.class);
     }

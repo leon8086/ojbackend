@@ -76,10 +76,8 @@ public class ExamController {
     }
 
     @GetMapping( "submission_list")
-    public Result getSubmissions( String examId, Integer problemId ){
-        LoginUser loginUser = (LoginUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = loginUser.getUser();
-        return Result.success(examService.getProblemSubmission( examId, problemId, user.getId() ));
+    public Result getSubmissions( String examId ){
+        return Result.success(examService.getProblemSubmission( examId ));
     }
 
     @GetMapping("profile")

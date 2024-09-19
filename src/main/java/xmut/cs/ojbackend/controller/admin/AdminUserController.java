@@ -1,7 +1,6 @@
 package xmut.cs.ojbackend.controller.admin;
 
 import com.mybatisflex.core.util.UpdateEntity;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import xmut.cs.ojbackend.base.Result;
@@ -10,6 +9,7 @@ import xmut.cs.ojbackend.entity.DTO.DTOUserImport;
 import xmut.cs.ojbackend.entity.Grade;
 import xmut.cs.ojbackend.entity.User;
 import xmut.cs.ojbackend.service.GradeService;
+import xmut.cs.ojbackend.service.SubmissionService;
 import xmut.cs.ojbackend.service.UserService;
 
 import java.util.List;
@@ -29,7 +29,7 @@ public class AdminUserController {
     private UserService userService;
 
     @Autowired
-    private HttpServletRequest httpServletRequest;
+    private SubmissionService submissionService;
 
     @Autowired
     private GradeService gradeService;
@@ -94,5 +94,15 @@ public class AdminUserController {
     public Result updateGrade( @RequestBody Grade grade ){
         Grade ug = UpdateEntity.of(Grade.class, grade.getId());
         return Result.success(grade);
+    }
+
+    @GetMapping("user-submissions")
+    public Result getUserSubmissions( Integer id ){
+        return Result.success( submissionService.adminGetUserSubmissions( id ));
+    }
+
+    @GetMapping("get")
+    public Result getUser( Integer id ){
+        return Result.success( userService.adminGetUser( id ));
     }
 }

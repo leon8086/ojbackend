@@ -107,4 +107,19 @@ public class SubmissionServiceImpl extends ServiceImpl<SubmissionMapper, Submiss
         };
         return res;
     }
+
+    @Override
+    public Object allMySubmission() {
+        QueryWrapper wrapper = new QueryWrapper();
+        User user = commonUtil.getCurrentUser();
+        return adminGetUserSubmissions(user.getId());
+    }
+
+    @Override
+    public Object adminGetUserSubmissions(Integer id) {
+        QueryWrapper wrapper = new QueryWrapper();
+        wrapper.where(SUBMISSION.USER_ID.eq(id));
+        wrapper.orderBy( SUBMISSION.CREATE_TIME.desc());
+        return mapper.selectListWithRelationsByQueryAs( wrapper, VOSubmissionList.class);
+    }
 }

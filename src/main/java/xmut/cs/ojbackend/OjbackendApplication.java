@@ -16,5 +16,4 @@ public class OjbackendApplication {
     public static void main(String[] args) {
         SpringApplication.run(OjbackendApplication.class, args);
     }
-
 }

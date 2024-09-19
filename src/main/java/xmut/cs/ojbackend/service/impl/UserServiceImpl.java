@@ -198,6 +198,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
+    public Object adminGetUser(Integer id) {
+        return this.getById(id);
+    }
+
+    @Override
     public Integer fetchGradeId(String gradeName) {
         QueryWrapper wrapper = new QueryWrapper();
         wrapper.where(GRADE.NAME.eq(gradeName));
@@ -351,7 +356,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public Object adminGetUserStatus(Integer id) {
         User user = this.getById(id);
-        return user;
+        return user.getProblemsStatus();
     }
 
     @Override
