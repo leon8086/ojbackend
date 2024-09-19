@@ -3,6 +3,7 @@ package xmut.cs.ojbackend.controller.admin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import xmut.cs.ojbackend.base.Result;
+import xmut.cs.ojbackend.config.ExamCheckException;
 import xmut.cs.ojbackend.entity.Exam;
 import xmut.cs.ojbackend.service.ExamService;
 
@@ -44,7 +45,14 @@ public class AdminExamController {
 
     @PostMapping("restart")
     public Result restart( @RequestBody Exam exam ){
-        return Result.success( examService.restart(exam.getId(), exam.getEndTime() ) );
+        return Result.success( examService.adminRestart(exam.getId(), exam.getEndTime() ) );
+    }
+
+    @PostMapping("restart-user")
+    public Result restartUser( @RequestBody Map<String, Integer> params ) throws ExamCheckException {
+        Integer examId = params.get("examId");
+        Integer userId = params.get("userId");
+        return Result.success( examService.adminRestartUser(examId, userId ) );
     }
 
     @GetMapping("submission")
@@ -64,5 +72,11 @@ public class AdminExamController {
     @GetMapping("user-profile")
     public Result userProfile( Integer examId, Integer userId ){
         return Result.success( examService.adminGetUserExamProfile( examId, userId ) );
+    }
+
+    @PostMapping("recount")
+    public Result recount( @RequestBody Map<String, Integer> params ){
+        Integer examId = params.get("examId");
+        return Result.success( examService.adminRecount(examId) );
     }
 }

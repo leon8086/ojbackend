@@ -133,6 +133,7 @@ public class ExamServiceImpl extends ServiceImpl<ExamMapper, Exam> implements Ex
     }
 
     Map<String, Object> getExamStatus( Exam exam ){
+        //System.out.println(exam);
         User user = commonUtil.getCurrentUser();
         if( exam.getIsEnded() ){
             return examEnded();
@@ -356,7 +357,7 @@ public class ExamServiceImpl extends ServiceImpl<ExamMapper, Exam> implements Ex
     }
 
     @Override
-    public Object restart(Integer id, Date endTime) {
+    public Object adminRestart(Integer id, Date endTime) {
         Exam exam = UpdateEntity.of(Exam.class, id);
         exam.setEndTime(endTime);
         exam.setIsEnded(false);
@@ -371,6 +372,59 @@ public class ExamServiceImpl extends ServiceImpl<ExamMapper, Exam> implements Ex
         wrapper.where( EXAM_PROFILE.USER_ID.eq(userId));
         wrapper.where( EXAM_PROFILE.EXAM_ID.eq(examId));
         return examProfilesMapper.selectOneByQuery(wrapper);
+    }
+
+    public void restartImp( Integer examId, Integer userId ) throws ExamCheckException{
+        Exam exam = getById(examId);
+        Map<String, Object> examStatus = getExamStatus(exam);
+        if( !(Boolean) examStatus.get("valid") ){
+            throw new ExamCheckException(examStatus);
+        }
+        QueryWrapper wrapper = QueryWrapper.create()
+                .where(EXAM_PROFILE.USER_ID.eq(userId))
+                .and(EXAM_PROFILE.EXAM_ID.eq(examId));
+        ExamProfile profile = examProfilesMapper.selectOneByQuery(wrapper);
+        if( profile.getIsEnded() ){
+            profile.setIsEnded(false);
+            examProfilesMapper.update(profile);
+        }
+    }
+
+    @Override
+    public Object adminRestartUser(Integer examId, Integer userId) throws ExamCheckException {
+        restartImp(examId, userId);
+        return "操作成功";
+    }
+
+    @Override
+    public Object restart(Integer examId) throws ExamCheckException {
+        User user = commonUtil.getCurrentUser();
+        restartImp(examId, user.getId());
+        return "操作成功";
+    }
+
+    @Override
+    public Object adminRecount(Integer examId) {
+        QueryWrapper wrapper = QueryWrapper.create()
+                .where(EXAM_PROFILE.EXAM_ID.eq(examId));
+        List<ExamProfile> profiles = examProfilesMapper.selectListByQuery(wrapper);
+        for( ExamProfile p : profiles ){
+            JSONObject obj = p.getInfo();
+            calcScore(p, obj);
+            examProfilesMapper.update(p);
+        }
+        return "调用成功";
+    }
+
+    private void calcScore(ExamProfile p, JSONObject obj) {
+        Integer totalScore = 0;
+        for( Map.Entry<?, ?> map : obj.entrySet()){
+            if( map.getKey().toString().contains("count")){
+                continue;
+            }
+            totalScore += (Integer) map.getValue();
+        }
+        p.setScore(totalScore);
     }
 
     @Override
@@ -528,12 +582,7 @@ public class ExamServiceImpl extends ServiceImpl<ExamMapper, Exam> implements Ex
         Integer newScore = examSubmission.getStatisticInfo().getInteger("score");
         if( oldScore < newScore ){
             obj.put(examSubmission.getProblemId().toString(), newScore);
-            Integer totalScore = 0;
-            for( Map.Entry<?, ?> map : obj.entrySet()){
-                totalScore += (Integer) map.getValue();
-            }
-            //System.out.println(totalScore);
-            profile.setScore(totalScore);
+            calcScore(profile, obj);
             profile.setLastUpdate(calendar.getTime());
         }
         examProfilesMapper.update(profile);

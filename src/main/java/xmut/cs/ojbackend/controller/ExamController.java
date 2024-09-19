@@ -103,4 +103,13 @@ public class ExamController {
         Integer examId = Integer.parseInt((String)params.get("examId"));
         return Result.success(examService.quitExam(examId));
     }
+
+    @PostMapping("restart")
+    public Result restartExam( @RequestBody Map<String, Integer> params ) throws ExamCheckException {
+        if( !params.containsKey("examId") ){
+            return Result.error( Result.WRONG_PARAMS );
+        }
+        Integer examId = params.get("examId");
+        return Result.success(examService.restart(examId));
+    }
 }

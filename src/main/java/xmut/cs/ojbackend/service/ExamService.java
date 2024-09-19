@@ -51,7 +51,13 @@ public interface ExamService extends IService<Exam> {
 
     Object adminGetExamSubmission(Integer examId, Integer userId);
 
-    Object restart(Integer id, Date endTime);
+    Object adminRestart(Integer id, Date endTime);
 
     Object adminGetUserExamProfile(Integer examId, Integer userId);
+
+    Object adminRestartUser(Integer examId, Integer userId) throws ExamCheckException;
+
+    Object restart(Integer examId) throws ExamCheckException;
+
+    Object adminRecount(Integer examId);
 }

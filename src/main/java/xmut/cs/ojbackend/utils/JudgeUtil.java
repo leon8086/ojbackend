@@ -27,6 +27,7 @@ import xmut.cs.ojbackend.service.UserService;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
 
 import static xmut.cs.ojbackend.entity.table.ScoreTableDef.SCORE;
 
@@ -151,15 +152,26 @@ public class JudgeUtil {
         return JSON.parseObject(data);
     }
 
+    public void adjustInfoJSON( Submission submission ){
+        JSONObject info = submission.getInfo();
+        JSONArray array = info.getJSONArray("data");
+        for( Object obj : array ){
+            JSONObject json = (JSONObject) obj;
+            json.put("output",json.getString("output").replaceAll("\u0000", Matcher.quoteReplacement("\\0")));
+        }
+    }
+
     public void judgeExam( ExamSubmission examSubmission, Problem problem ) throws JsonProcessingException{
         //向判题服务器发送post请求
         judge(examSubmission, problem);
+        adjustInfoJSON(examSubmission);
         examSubmissionMapper.update(examSubmission);
         // 更新exam的状态
     }
 
     public void judgeNormal( Submission submission, Problem problem ) throws JsonProcessingException {
         judge(submission, problem);
+        adjustInfoJSON(submission);
         submissionMapper.update(submission);
         updateProblemStatus(submission, problem);
         updateUserprofile(submission, problem);
